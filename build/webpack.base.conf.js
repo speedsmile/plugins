@@ -4,7 +4,7 @@ var webpack = require('webpack')
 var ExtractTextWebpackPlugin = require('extract-text-webpack-plugin')
 var config = require('../config')
 var vueLoaderConfig = require('./vue-loader.conf')
-var entry = require('../modules/entry')
+var entry = require('../src/modules/entry')
 var HtmlWebpackPlugin = require('html-webpack-plugin')
 var htmlConfig = {
   minify: {
