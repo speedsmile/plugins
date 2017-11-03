@@ -26,21 +26,21 @@
           <!-- 关键字搜索结果列表（焦点面板），二维数组 -->
           <!--<focus-panel ref="resultList" class="drop-list full-width">-->
           <!--<ul class="search-result list-group">-->
-          <!--<li v-for="item in searchResult" :class="{selectedlight: isSelected(item)}">-->
-          <!--<a class="link" href="javascript:;" @click="itemClick(item)">{{item[labelField]}}</a>-->
+          <!--<li v-for="item in searchResult" :class="{selectedlight: isSelected(item)}" @click="itemClick(item)">-->
+          <!--<a class="link" href="javascript:;">{{item[labelField]}}</a>-->
           <!--</li>-->
           <!--</ul>-->
           <!--</focus-panel>-->
         </div>
         <!-- 下拉列表区域 -->
         <ul class="list" v-show="!searchKeywords">
-          <li v-for="item in items" :class="{selectedlight: isSelected(item)}">
-            <a class="link" href="javascript:;" @click="itemClick(item)">{{item[labelField]}}</a>
+          <li v-for="item in items" :class="{selectedlight: isSelected(item)}" @click="itemClick(item)">
+            <a class="link" href="javascript:;">{{item[labelField]}}</a>
           </li>
         </ul>
         <ul class="list" v-show="searchKeywords">
-          <li v-for="item in searchResult" :class="{selectedlight: isSelected(item)}">
-            <a class="link" href="javascript:;" @click="itemClick(item)">{{item[labelField]}}</a>
+          <li v-for="item in searchResult" :class="{selectedlight: isSelected(item)}" @click="itemClick(item)">
+            <a class="link" href="javascript:;">{{item[labelField]}}</a>
           </li>
         </ul>
 
@@ -272,6 +272,7 @@
        */
       itemClick: function (item) {
         this.addSelection(item);
+        this.multiple === false && this.collapse();
       },
       isSelected: function (item) {
         var valueField = this.valueField;
@@ -346,13 +347,11 @@
       },
       // 下拉项选中数据的字段映射方式
       _mapSelectedItems(v){
-          debugger;
         // 根据mapField的规则，是否需要把选中
         var map = this.map, labelField = this.labelField, valueField = this.valueField,
           labels, values, model = v, modelType,
           set = (map, name, value) => {
             let m = map[name];
-            debugger;
             if(m){
               let context = this._parseContext(m.context, m.scope);
               context[m.field] = value;
@@ -403,7 +402,6 @@
             values = valueMap && this._parseContext(valueMap.context, valueMap.scope)[valueMap.field];
           if(modelType == "value")values = this.vModel;
           else if(modelType == "label")labels = this.vModel;
-          debugger;
           if(labels){
               if(this.multiple){
                 items = [];
@@ -434,7 +432,6 @@
               // 监听label的变化
             if(modelType == "value" && labelMap){
               labelMap.scope.$watch(labelMap.context + "." + labelMap.field, () => {
-                debugger;
                 this._setSelectedItems()
               });
 //              labelMap.scope.$watch(labelMap.context, () => {
