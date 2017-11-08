@@ -11,13 +11,17 @@
         </li>
       </ul>
       <div class="placeholder" v-else v-text="placeholder"></div>
-      <div class="icon-drop"></div>
+      <i class="icon-clear" @click.stop="removeAll"
+         v-if="clearable!==false&&selectedItems&&selectedItems.length">
+        <i class="icon">&times;</i>
+      </i>
+      <i class="icon-drop"></i>
     </div>
     <!-- 下拉区域 -->
     <focus-panel ref="list" class="drop-list">
       <slot>
         <!-- 搜素区域 -->
-        <div class="search-group" v-show="filter">
+        <div class="search-group" v-show="filterable">
           <!-- 搜索框 -->
           <div class="input-group">
             <input type="text" class="search-input" v-model="searchKeywords" :placeholder="filterPlaceholder">
@@ -26,7 +30,7 @@
           <!-- 关键字搜索结果列表（焦点面板），二维数组 -->
           <!--<focus-panel ref="resultList" class="drop-list full-width">-->
           <!--<ul class="search-result list-group">-->
-          <!--<li v-for="item in searchResult" :class="{selectedlight: isSelected(item)}" @click="itemClick(item)">-->
+          <!--<li v-for="item in searchResult" :class="{selected: isSelected(item)}" @click="itemClick(item)">-->
           <!--<a class="link" href="javascript:;">{{item[labelField]}}</a>-->
           <!--</li>-->
           <!--</ul>-->
@@ -34,12 +38,12 @@
         </div>
         <!-- 下拉列表区域 -->
         <ul class="list" v-show="!searchKeywords">
-          <li v-for="item in items" :class="{selectedlight: isSelected(item)}" @click="itemClick(item)">
+          <li v-for="item in items" :class="{selected: isSelected(item)}" @click="itemClick(item)">
             <a class="link" href="javascript:;">{{item[labelField]}}</a>
           </li>
         </ul>
         <ul class="list" v-show="searchKeywords">
-          <li v-for="item in searchResult" :class="{selectedlight: isSelected(item)}" @click="itemClick(item)">
+          <li v-for="item in searchResult" :class="{selected: isSelected(item)}" @click="itemClick(item)">
             <a class="link" href="javascript:;">{{item[labelField]}}</a>
           </li>
         </ul>
@@ -86,14 +90,10 @@
       vModel: {default: null},
       /**下拉控件选中项的label和value的映射方式
        * 默认：使用v-model，格式为{labelField: , valueField}，多选状态下返回数组
-         label：label单独映射一个字段，参数：{field: "字段名称|String", context: 映射字段的上下文对象（反向修改使用）}
-         value：value单独映射一个字段，参数：{field: "字段名称|String", context: 映射字段的上下文对象（反向修改使用）}
-
+       label：label单独映射一个字段，参数：{field: "字段名称|String", context: 映射字段的上下文对象（反向修改使用）}
+       value：value单独映射一个字段，参数：{field: "字段名称|String", context: 映射字段的上下文对象（反向修改使用）}
        * */
       map: {
-        default: null
-      },
-      t: {
         default: null
       },
       /**v-model指令映射字段
@@ -104,12 +104,14 @@
       model: {default: "value"},
       // 是否多选
       multiple: {default: false},
+      // 是否显示清除
+      clearable: {default: false},
       /**对下拉数据筛选
        * 假值：关闭搜索功能；
        * 真值（默认）：本地搜索，只对下拉中的数据新进筛选；
        * "remote"：远程搜索
        * */
-      filter: {default: 1},
+      filterable: {default: 1},
       // 搜索的方法，默认使用本地搜索的方法
       filterMethod: {
         type: Function
@@ -126,7 +128,7 @@
         },
         set: function (v) {
           if (v != this.items_) {
-            this.items_ = this.convert(v);
+            this.items_ = this._convert(v);
           }
         }
       },
@@ -137,7 +139,7 @@
         },
         set: function (v) {
           if (v != this.selectedItems_) {
-            var selectedItems = this.convert(v);
+            var selectedItems = this._convert(v);
             this.selectedItems_ = this.multiple ? selectedItems : selectedItems.slice(0, 1);
           }
         }
@@ -162,7 +164,7 @@
                 vue.searchResult = result;
               }
 
-              if (this.filter) {
+              if (this.filterable) {
                 this.filterMethod ? this.filterMethod(v, cb) : this.localFilter();
               }
             }
@@ -181,37 +183,26 @@
           return this.searchResult_
         },
         set(v){
-          this.searchResult_ = this.convert(v);
-          if (this.searchResult_ && this.searchResult_.length) {
-//            this.$refs.resultList.expand();
-          } else {
-//            this.$refs.resultList.collapse();
-          }
+          this.searchResult_ = this._convert(v);
         }
       }
     },
     watch: {
-      value: function (a, b, c) {
+      value: function () {
         this.items = this.value
       },
       vModel: function () {
-        this._setSelectedItems();
-      },
-      map: function () {
-        this._setSelectedItems();
-      },
-//      "$parent.editData": function(){
-//        debugger;
-//        this._setSelectedItems();
-//      },
-//      "$parent.editData.labels": function(){
-//        debugger;
-//        this._setSelectedItems();
-//      }
+        this.model == "label" ? this._setSelectedItems("label") : this._setSelectedItems();
+      }
     },
     methods: {
+      // 设置选中项
+      setSelection(items){
+        items = this._convertArray(items);
+
+      },
       // 添加选中项
-      addSelection: function (item) {
+      addSelection (item) {
         var selections = this.selectedItems;
         if (this.multiple) {
           let valueField = this.valueField;
@@ -223,11 +214,11 @@
           selections = [item];
         }
         let value = this.multiple ? selections : selections[0];
-        let {model} = this._mapSelectedItems(value);
+        let {model} = this._updateModels(value);
         this.$emit("on-change", model, {component: this, des: "add"});
       },
       //移除选中项
-      removeSelection: function (item) {
+      removeSelection (item) {
         if (this.mode == 1) {
           let selections = this.selectedItems, valueField = this.valueField;
           selections.some(function (i, index) {
@@ -237,12 +228,17 @@
             }
           });
           let value = this.multiple ? (selections.length ? selections : null) : selections[0];
-          let {model} = this._mapSelectedItems(value);
+          let {model} = this._updateModels(value);
           this.$emit("on-change", model, {component: this, des: "remove"});
         }
       },
+      // 移除全部选项
+      removeAll(){
+        let {model} = this._updateModels(this.selectedItems = null);
+        this.$emit("on-change", model, {component: this, des: "remove"});
+      },
       //展开下拉，定位搜索框
-      expand: function () {
+      expand () {
         if (this.mode == 1 && this.status != "expand") {
           this.status = "expand";
           this.$refs.list.expand(1);
@@ -250,7 +246,7 @@
         }
       },
       //状态改为收回状态，下拉的收回状态由下拉对象自己处理
-      collapse: function () {
+      collapse () {
         if (this.mode == 1) {
           if (this.status != "collapse") {
             this.status = "collapse";
@@ -262,7 +258,7 @@
           }
         }
       },
-      toggle: function () {
+      toggle () {
         if (this.mode == 1) {
           this.status == "collapse" ? this.expand() : this.collapse();
         }
@@ -270,11 +266,11 @@
       /**列表项的点击选择事件
        * @param item，点击项。item.type==1，不选中该项，开启对应的二级标签
        */
-      itemClick: function (item) {
+      itemClick (item) {
         this.addSelection(item);
         this.multiple === false && this.collapse();
       },
-      isSelected: function (item) {
+      isSelected (item) {
         var valueField = this.valueField;
         return this.selectedItems && this.selectedItems.some(function (selectionItem) {
             return selectionItem[valueField] == item[valueField];
@@ -289,74 +285,11 @@
         }
         this.searchResult = filterItems;
       },
-      convert (v, k, l) {
-        var valueField = this.valueField, labelField = this.labelField, obj, arr;
-        k || (k = valueField);
-        l || (l = labelField);
-        //设置数据的时候要经过格式转换。兼容json、数组、对象
-        //如果是字符串，先尝试当成json转成对象
-        if (typeof v == "string") {
-          try {
-            v = JSON.parse(v);
-          } catch (e) {
-            v = [];
-          }
-        }
-        if (v instanceof Array) {
-          return v.map(function (item) {
-            if (typeof item == "object") {
-              obj = $.extend(true, {}, item);
-              obj[valueField] = item[k];
-              obj[labelField] = item[l];
-              valueField != k && delete obj[k];
-              labelField != l && delete obj[l];
-            } else {
-              obj = {};
-              obj[valueField] = item;
-              obj[labelField] = item;
-            }
-            return obj;
-          });
-        } else if (v instanceof Object) {
-          arr = [];
-          if (v.hasOwnProperty(valueField) && v.hasOwnProperty(labelField)) {
-            obj = {};
-            obj[valueField] = v[valueField];
-            obj[labelField] = v[labelField];
-            arr.push(obj);
-          } else {
-            for (var i in v) {
-              obj = {};
-              obj[valueField] = i;
-              obj[labelField] = v[i];
-              arr.push(obj);
-            }
-          }
-          return arr;
-        }
-        return v || [];
-      },
-      // 补全对象表达式。"a.b.c.d" => {a:{b: {c:{d...}}}}
-      _parseContext(expr, $scope){
-          var arr = expr.split("."), current = $scope;
-          for(let k of arr){
-              // 对象表达式的路径中如果有对象不存在，默认补成{}
-            current = current[k] || (current[k] = {});
-          }
-          return current
-      },
       // 下拉项选中数据的字段映射方式
-      _mapSelectedItems(v){
+      _updateModels(v){
         // 根据mapField的规则，是否需要把选中
         var map = this.map, labelField = this.labelField, valueField = this.valueField,
-          labels, values, model = v, modelType,
-          set = (map, name, value) => {
-            let m = map[name];
-            if(m){
-              let context = this._parseContext(m.context, m.scope);
-              context[m.field] = value;
-            }
-        };
+          labels, values, model = v, modelType;
         if (map) {
           if (v) {
             modelType = this.model;
@@ -374,95 +307,212 @@
             }
           }
           // 1. model替代value
-          if(modelType == "value"){
+          if (modelType == "value") {
             model = values;
-            set(map, "label", labels);
+            this._set(map, "label", labels);
           }
           // 2. model替代label
-          else if(modelType == "label"){
+          else if (modelType == "label") {
             model = labels;
-            set(map, "value", values);
+            this._set(map, "value", values);
           }
           // 3. model使用默认方式
-          else{
-            set(map, "label", labels);
-            set(map, "value", labels);
+          else {
+            this._set(map, "label", labels);
+            this._set(map, "value", values);
           }
         }
         return {model, label: labels, value: values}
       },
-      _setSelectedItems(){
+      /**设置下拉选中项。
+       * 默认情况下，同时设置value和label。绑定的数据中没有和value对应的label，优先从下拉数据中查找和value对应的label，没有才使用绑定的label
+       * value和label映射2个字段一前一后被赋值并且先后不定，设置primary参数可允许一个一个改变
+       * @param primary
+       *        "value"：只设置value字段。即使当前存在value，也可以直接改变显示的label。不会改变下拉数据中和value对应的label
+       *        "label"：只设置label字段。即使当前存在value，也可以直接改变显示的label。不会改变下拉数据中和value对应的label
+       * */
+      _setSelectedItems(primary){
         /**设置初始选中的下拉选项
          * 如果设置了mapField字段，优先vModel
          * */
         var map = this.map;
-        if(map){
-          let items, labelMap = map.label, valueMap = map.value, modelType = this.model,
-            labels = labelMap && this._parseContext(labelMap.context, labelMap.scope)[labelMap.field],
-            values = valueMap && this._parseContext(valueMap.context, valueMap.scope)[valueMap.field];
-          if(modelType == "value")values = this.vModel;
-          else if(modelType == "label")labels = this.vModel;
-          if(labels){
-              if(this.multiple){
-                items = [];
-                for(let i = 0, l = labels.length; i < l; i++){
-                  items.push({
-                    [this.valueField]: values && values[i],
-                    [this.labelField]: labels[i]
-                  });
-                }
-              }else{
-                  items = {
-                    [this.valueField]: values,
-                    [this.labelField]: labels
-                  }
-              }
-            this.selectedItems = items;
+        if (map) {
+          let items, labelMap = this._parseContext(map.label), valueMap = this._parseContext(map.value),
+            modelType = this.model,
+            values = [], labels = [],
+            _values = valueMap && valueMap.context[valueMap.field],
+            _labels = labelMap && labelMap.context[labelMap.field];
+
+          if (modelType == "value") _values = this.vModel;
+          else if (modelType == "label") _labels = this.vModel;
+          _values = this._convertArray(_values);
+          _labels = this._convertArray(_labels);
+          let arr = [];
+          /**
+           * */
+          for (let i = 0, l = primary ? _labels.length : Math.max(_values.length, _labels.length); i < l; i++) {
+            // 只设置label，value保持原来的不变
+            let item = primary ? {
+              [this.valueField]: _values[i],
+              [this.labelField]: _labels[i]
+            } : this._findItem(_values[i], _labels[i]);
+            if (item) {
+              arr.push(item);
+              values.push(item[this.valueField]);
+              labels.push(item[this.labelField]);
+            }
           }
-        }else{
+          items = arr;
+          // 设置了value，label的值可能会发生改变，需要label的值同步到响应的字段
+          if (!primary) {
+            let labelValue = this.multiple ? labels : labels[0];
+            modelType == "value" ? this._set(map, "label", labelValue) : this.$emit("on-change", labelValue, {component: this, des: "change"})
+          }
+          this.selectedItems = items;
+        } else {
           this.selectedItems = this.vModel;
         }
       },
+      _set(map, name, value) {
+        let m = map[name];
+        if (m) {
+          let {context, field} = this._parseContext(m);
+          context[field] = value;
+        }
+      },
+      /**判断新旧数据在数据的角度上是否相等。
+       * 比如在程序上，[1]不等于[1]；但在数据上视为相等。
+       * 使用场景：变量发生变化执行了数据加工方法后重新使用新的变量改变原始变量，会再次触发变量修改事件
+       *   进行数据上的相等判断，防止陷入死循环
+       * */
+      _eq(newData, oldData){
+      },
       // 监听map中的变化
       _watchMap(){
-          var map = this.map;
-          if(map){
-              let modelType = this.model, labelMap = map.label, valueMap = map.value;
-            // vModel是可响应的，
-              // 监听label的变化
-            if(modelType == "value" && labelMap){
-              labelMap.scope.$watch(labelMap.context + "." + labelMap.field, () => {
-                this._setSelectedItems()
-              });
-//              labelMap.scope.$watch(labelMap.context, () => {
-//                debugger;
-//                this._setSelectedItems()
-//              })
+        var map = this.map;
+        if (map) {
+          let modelType = this.model, labelMap = map.label, valueMap = map.value;
+          // vModel是可响应的，
+          // 监听label的变化
+          if (labelMap) {
+            labelMap.scope.$watch(labelMap.context, (...args) => {
+              console.log(...args)
+              this._setSelectedItems("label")
+            });
+          }
+          // 监听value的变化
+          if (valueMap) {
+            valueMap.scope.$watch(valueMap.context, (...args) => {
+              console.log(...args)
+              this._setSelectedItems()
+            });
+          }
+        }
+      },
+      _convert (v, k, l) {
+        var valueField = this.valueField, labelField = this.labelField, obj, arr = [];
+        k || (k = valueField);
+        l || (l = labelField);
+        //设置数据的时候要经过格式转换。兼容json、数组、对象
+        //如果是字符串，先尝试当成json转成对象
+        if (typeof v == "string") {
+          try {
+            v = JSON.parse(v);
+          } catch (e) {
+            v = [];
+          }
+        }
+        if (v instanceof Array) {
+          v.forEach(function (item) {
+            if (typeof item == "object") {
+              obj = $.extend(true, {}, item);
+              obj[valueField] = item[k];
+              obj[labelField] = item[l];
+              valueField != k && delete obj[k];
+              labelField != l && delete obj[l];
+            } else {
+              obj = {};
+              obj[valueField] = item;
+              obj[labelField] = item;
             }
-            // 监听value的变化
-            else if(modelType == "label" && valueMap){
-              valueMap.scope.$watch(valueMap.context + "." + valueMap.field, () => {
-                debugger;
-                this._setSelectedItems()
-              });
-//              valueMap.scope.$watch(valueMap.context, () => {
-//                debugger;
-//                this._setSelectedItems()
-//              })
+            arr.push(obj);
+          });
+        } else if (v instanceof Object) {
+          if (v.hasOwnProperty(valueField) && v.hasOwnProperty(labelField)) {
+            obj = {};
+            obj[valueField] = v[valueField];
+            obj[labelField] = v[labelField];
+            arr.push(obj);
+          } else {
+            for (var i in v) {
+              obj = {};
+              obj[valueField] = i;
+              obj[labelField] = v[i];
+              arr.push(obj);
             }
           }
+        }
+        else {
+          arr = v || [];
+        }
+        return arr;
+      },
+      /**把参数统一成数组格式返回
+       * @param v 数组：直接返回，空值(null,undefined,"")：返回空数组，其它：push到数组中返回
+       * */
+      _convertArray(v){
+        return v instanceof Array ? v : this._isNull(v) ? [] : [v]
+      },
+      // 空值：null,undefined,""
+      _isNull(v){
+        return v == null || v === ""
+      },
+      /**补全对象表达式。"a.b.c.d" => {a:{b: {c:{d...}}}}
+       * @return Object {
+          context: 绑定的对象的父级对象（给绑定对象赋值必须使用父级对象）,
+          field: 从context中解析出来的绑定对象的字段名称
+        }
+       * */
+      _parseContext(map){
+        if (!map) return null;
+        let expr = map.context, $scope = map.scope;
+        // 直接挂在根元素下的字段没有作用域表达式
+        if (!expr || !$scope) throw Error("属性[value|label]-map参数不正确，context和scope都是必须的");
+        let arr = expr.split("."), head, context = $scope;
+        for (let i = 0, l = arr.length; i < l - 1; i++) {
+          // 表达式中的上游路径的对象不存在，默认补成{}
+          context = context[arr[i]] || (context[arr[i]] = {});
+          // 根对象
+          head || (head = context)
+        }
+        // 作用域路径链构建完成后，把链路的根对象挂在$scope下（构建响应式数据）
+        head && ($scope[arr[0]] = head);
+        return {context, field: arr[arr.length - 1]}
+      },
+      /**有value无label，从下拉中查找和value匹配得上的label
+       * 有label无value，选中项中显示label，value空着，多选状态下的value数组也空着
+       * value和label都没有，跳过空值
+       * 如果没有下拉数据，等下拉数据变化后再执行上面的检测
+       * */
+      _findItem(value, label){
+        var items = this.items, valueField = this.valueField, labelField = this.labelField;
+        if (!value) {
+          return null
+        }
+        if (!this._isNull(value)) {
+          items.find(n => (n[valueField] == value) && (label = n[labelField], true));
+        }
+        return {[valueField]: value, [labelField]: label}
       }
     },
     created () {
       // 组件初始化，prop和v-model绑定的数据在set访问器创建之前已经注入进来。一些需要转换格式的数据需手动调用数据转换方法
       this.items = this.value;
       this._setSelectedItems();
-//      debugger;
       this._watchMap();
     },
     mounted () {
       var vue = this, $refs = this.$refs, list = $refs.list;
-//      $refs.resultList.addActionTargets($(list.$el).find(".search-input")[0]);
       list.addFocusEvent(this.$el);
       list.$on("on-expand", function (e) {
         vue.expand();

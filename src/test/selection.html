@@ -7,19 +7,19 @@
 <body style="height: 600px;">
     <div id="app">
       <i-form ref="editData" :model="editData" :rules="ruleValidate">
+        <form-item label="selection" prop="selection">
+          <selection v-model="editData.selection" :value="items" placeholder="请选择"
+                     :filter-method="filter" clearable multiple
+                     :map="{value:{context:'labels', scope: this}}" model="label"
+                     @on-open="log('open')" @on-close="log('close')"
+          ></selection>
+        </form-item>
         <form-item label="select" prop="select">
           <div class="groups cat-pre">
             <i-select v-model="editData.select" clearable>
               <i-option v-for="i in items" :key="i.key" :value="i.key">{{i.text}}</i-option>
             </i-select>
           </div>
-        </form-item>
-        <form-item label="selection" prop="selection">
-          <selection v-model="editData.selection" :value="items" placeholder="请选择"
-                     :filter-method="filter"
-                     :map="{label:{context:'editData',field:'labels', scope: this}}"
-                     @on-open="log('open')" @on-close="log('close')"
-          ></selection>
         </form-item>
       </i-form>
     </div>

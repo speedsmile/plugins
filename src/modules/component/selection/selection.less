@@ -1,4 +1,4 @@
-@blue-basic: rgba(45,140,240,.9);
+@blue-basic: rgba(45, 140, 240, .9);
 @font-color: #495060;
 @placeholder-color: #bbbec4;
 @gray-border: #dddee1;
@@ -9,8 +9,8 @@
 @close-size: 14px;
 
 /* 禁用色 start */
-@disabled-bg: #ebebe4;//被禁用的元素的背景色
-@disabled-border: #d3d3d3;//被禁用的元素的边框色
+@disabled-bg: #ebebe4; //被禁用的元素的背景色
+@disabled-border: #d3d3d3; //被禁用的元素的边框色
 
 /* 尺寸 start */
 @control-height: 32px;
@@ -20,28 +20,44 @@
 @control-valign: middle;
 
 /* 蓝色面板系列 start */
-@tab-blue-theme: #3b8bd8;//tab选项卡的主题颜色
-@panel-blue-theme: #007eb0;//panel面板的边框色
+@tab-blue-theme: #3b8bd8; //tab选项卡的主题颜色
+@panel-blue-theme: #007eb0; //panel面板的边框色
 
-.m-selection(){
-  .selection, .drop-list{
+.ellipsis(){
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.m-selection() {
+  .selection, .drop-list {
     font-size: @normal-size;
     color: @font-color;
-    i{
+    i {
       font-style: normal;
     }
-    a{
+    a {
       color: inherit;
       text-decoration: none;
     }
-    .full-width{width: 100%;}
-    &.h{
-      .list{
-        li{
+    .full-width {
+      width: 100%;
+    }
+    &.h {
+      .list {
+        li {
           display: inline-block;
+          padding: 8px;
+          &:hover{
+            background-color: transparent;
+            .link{
+                color: @blue-basic;
+                text-decoration: underline;
+            }
+          }
         }
       }
-      .link{
+
+      .link {
         //cursor: pointer;
         //&:hover{
         //  color: @blue-basic;
@@ -50,9 +66,10 @@
         //  text-decoration: underline;
         //}
       }
+
     }
   }
-  .selection{
+  .selection {
     position: relative;
     display: inline-block;
     width: 100%;
@@ -61,103 +78,130 @@
     border-radius: @radius;
     background-color: #fff;
     vertical-align: middle;
-    *{
+    * {
       box-sizing: border-box;
     }
-    &, .selection-area{
+    &, .selection-area {
       min-height: @selection-height;
     }
-    &.disabled{
+    &.disabled {
       border-color: @disabled-border;
       background-color: @disabled-bg;
-      .icon-drop::after{
+      .icon-drop::after {
         border-top-color: @disabled-bg;
       }
-      &.expand .icon-drop::after{
+      &.expand .icon-drop::after {
         border-bottom-color: @disabled-bg;
       }
     }
-    ul{
+    .selection-area{
+      cursor: pointer;
+      &:hover{
+        .icon-clear{
+          display: block;
+        }
+      }
+    }
+    ul {
       margin: 0;
       padding: 0;
       list-style: none;
     }
-    .placeholder{
+    .placeholder {
       padding-left: @control-padding-lr;
       padding-right: 20px;
-      min-height: 28px;
-      line-height: 28px;
+      min-height: @selection-height;
+      line-height: @selection-height;
       color: @placeholder-color;
     }
-    .icon-drop{
+    .icon-clear{
+      @size: 14px;
+      position: absolute;
+      display: none;
+      z-index: 1;
+      top: 50%;
+      right: 6px;
+      margin-top: @size / -2;
+      width: @size;
+      height: @size;
+      font-size: @size;
+      line-height: 15px;
+      color: #fff;
+      text-align: center;
+      border-radius: 50%;
+      background-color: #80848f;
+    }
+    .icon-drop {
       position: absolute;
       top: 50%;
-      right: 8px;
+      right: 6px;
       margin-top: -3px;
       width: 12px;
       height: 5px;
       border-color: #80848f;
       transition: all .2s ease-in-out;
-      &:before, &:after{
+      &:before, &:after {
         content: "";
         position: absolute;
         border-style: solid;
         border-color: transparent;
         border-width: 5px 6px 0;
       }
-      &:before{
+      &:before {
         border-top-color: inherit;
       }
-      &:after{
+      &:after {
         top: -2px;
         border-top-color: #fff;
       }
     }
-    &.expand .icon-drop{
+    &.expand .icon-drop {
       transform: rotate(180deg);
     }
-    .selection-list{
-      padding-right: 20px;//预留位置给下拉箭头
+    .selection-list {
+      padding-right: 20px; //预留位置给下拉箭头
       height: 100%;
-      .selection-item{
-        position: relative;
-        display: inline-block;
-        margin: 4px;
-        padding-left: @control-padding-tb + 2;
-        line-height: 19px;
-        background-color: #f7f7f7;
-        border: 1px solid @gray-border;
-        border-radius: 3px;
-        cursor: pointer;
-        &:hover{
-          opacity: .85;
-        }
-      }
-      .icon-deselect{
-        //margin-left: @control-padding-tb - 2;
-        position: relative;
-        top: 1px;
-        padding: 0 4px;
-        font-size: 16px;
-        color: #666;
-        opacity: .66;
-        cursor: pointer;
+    }
+    .selection-item {
+      position: relative;
+      display: inline-block;
+      margin: 4px;
+      padding-left: @control-padding-tb + 2;
+      line-height: 19px;
+      background-color: #f7f7f7;
+      border: 1px solid @gray-border;
+      border-radius: 3px;
+      cursor: pointer;
+      &:hover {
+        opacity: .85;
       }
     }
-    .drop-list{
+    .icon-deselect {
+      position: relative;
+      top: 1px;
+      padding: 0 4px;
+      font-size: 16px;
+      color: #666;
+      opacity: .66;
+    }
+    .drop-list {
       box-sizing: content-box;
       left: -1px;
+      margin-top: 1px;
       width: 100%;
+      max-height: 260px;
+      overflow: auto;
     }
-    .search-input{
+    .search-input {
       margin-bottom: 0;
     }
     // 单选模式
-    &.single{
-      .selection-list{
+    &.single {
+      .selection-list {
         height: @selection-height
       }
-      .selection-item{
+      .selection-item {
+        .ellipsis;
         display: block;
         margin: 0;
         height: 100%;
@@ -165,39 +209,17 @@
         border: none;
         background-color: transparent;
       }
-      .icon-deselect{
-        position: absolute;
-        top: -1px;
-        right: 0;
+      .icon-deselect {
+        display: none;
       }
     }
-    &.multiple{
-      .selection-list{
+    &.multiple {
+      .selection-list {
         font-size: @small-size;
       }
     }
   }
-  //焦点面板
-  .focus-panel{
-    .panel-content{
-      position: relative;
-      z-index: 2;
-    }
-    .default-focus{
-      position: absolute;
-      z-index: 1;
-      top: 0;
-      left: 0;
-      width: 1px;
-      height: 1px;
-      border: 0;
-      opacity: 0;
-      &:focus, &:active{
-        outline: none;
-      }
-    }
-  }
-  .drop-list{
+  .drop-list {
     @padding: 15px 25px;
     position: absolute;
     z-index: 100;
@@ -205,33 +227,27 @@
     border: 1px solid @gray-border;
     border-radius: @radius;
     background-color: #fff;
-    a, input{
-      &, &:focus, &:active{
+    a, input {
+      &, &:focus, &:active {
         border: none;
         outline: none;
         background-color: transparent;
       }
     }
-    .selectedlight{
-      a{
+    .selected {
+      a {
         color: @blue-basic;
       }
     }
-    .active(){
-      color: @blue-basic;
-    }
-    a.active{
-      .active();
-    }
-    .search-group{
+    .search-group {
       position: relative;
       z-index: 2;
       margin: 0 0 @control-padding-tb;
-      .drop-list{
+      .drop-list {
         left: 0;
       }
     }
-    .search-result{
+    .search-result {
       position: absolute;
       left: 0;
       width: 100%;
@@ -241,12 +257,12 @@
       background-color: #fff;
       overflow-y: auto;
     }
-    .input-group{
+    .input-group {
       width: 100%;
       border: 1px solid @disabled-border;
       border-radius: @radius;
       color: #666;
-      .search-input{
+      .search-input {
         padding: 0 @control-padding-lr;
         width: 100%;
         height: 30px;
@@ -255,13 +271,13 @@
         color: inherit;
         font-size: inherit;
       }
-      .icon-search{
+      .icon-search {
         @icon-search-width: 13px;
         display: table-cell;
         width: @icon-search-width + @control-padding-lr * 2;
         border: none;
-        background: none;// easyui有默认图标
-        &:before{
+        background: none; // easyui有默认图标
+        &:before {
           content: "";
           display: block;
           width: @icon-search-width;
@@ -273,37 +289,52 @@
         }
       }
     }
-    .list{
-      li{
+    .list {
+      li {
+        .ellipsis;
         padding: 8px 16px;
         cursor: pointer;
-        &:hover{
+        &:hover {
           background-color: @bg-hover;
         }
       }
-      .title{
-        width: 30px;
-      }
     }
-    }
-  }
-  .selection-label{
-    vertical-align: top;
-    line-height: 30px;
   }
 
+  //焦点面板
+  .focus-panel {
+    .panel-content {
+      position: relative;
+      z-index: 2;
+    }
+    .default-focus {
+      position: absolute;
+      z-index: 1;
+      top: 0;
+      left: 0;
+      width: 1px;
+      height: 1px;
+      border: 0;
+      opacity: 0;
+      &:focus, &:active {
+        outline: none;
+      }
+    }
+  }
+}
 //统一placeholder的颜色
-.placeholder(@color: #a9a9a9){
-  ::-webkit-input-placeholder{
+.placeholder(@color: #a9a9a9) {
+  ::-webkit-input-placeholder {
     color: @color;
   }
-  *::-moz-placeholder{
+  *::-moz-placeholder {
     color: @color;
     opacity: 1;
   }
-  :-ms-input-placeholder{
+  :-ms-input-placeholder {
     color: @color;
   }
 }
+
 .m-selection();
 .placeholder(@placeholder-color);
