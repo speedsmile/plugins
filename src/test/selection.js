@@ -9,7 +9,7 @@ Vue.component(selection.name, selection);
 window.vm = new Vue({
   el: "#app",
   data: {
-    labels: ["2"],
+    labels: null,
     editData: {
       selection: null,
       labels: null,

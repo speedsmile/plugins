@@ -8,9 +8,9 @@
     <div id="app">
       <i-form ref="editData" :model="editData" :rules="ruleValidate">
         <form-item label="selection" prop="selection">
-          <selection v-model="editData.selection" :value="items" placeholder="请选择"
+          <selection v-model="editData.selection" :value="items" default-index="2" placeholder="请选择"
                      :filter-method="filter" clearable multiple
-                     :map="{value:{context:'labels', scope: this}}" model="label"
+                     :map="{label:{context:'labels', scope: this}}"
                      @on-open="log('open')" @on-close="log('close')"
           ></selection>
         </form-item>

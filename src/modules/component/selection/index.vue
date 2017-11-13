@@ -47,7 +47,6 @@
             <a class="link" href="javascript:;">{{item[labelField]}}</a>
           </li>
         </ul>
-
       </slot>
     </focus-panel>
   </div>
@@ -64,7 +63,7 @@
     components: {focusPanel},
     model: {
       prop: 'vModel',
-      event: 'on-change'
+      event: 'on-model-change'
     },
     data () {
       return {
@@ -88,6 +87,11 @@
       },
       // 选中的下拉数据——和v-model（用户数据）绑定一起
       vModel: {default: null},
+      /**默认选中项。当且仅当下拉数据重置时生效，避免置空下拉选项特意把vaue设置成空
+       * 对下拉数据（value）进行重置，选中的value为空，这时启用defaultIndex
+       * 默认不启用。设置该字段后索引值默认是0
+       * */
+      defaultIndex: {default: null},
       /**下拉控件选中项的label和value的映射方式
        * 默认：使用v-model，格式为{labelField: , valueField}，多选状态下返回数组
        label：label单独映射一个字段，参数：{field: "字段名称|String", context: 映射字段的上下文对象（反向修改使用）}
@@ -129,6 +133,16 @@
         set: function (v) {
           if (v != this.items_) {
             this.items_ = this._convert(v);
+            // 设置默认选项
+            if (this.items_ && (!this.selectedItems || !this.selectedItems.length) && this.defaultIndex !== null) {
+              this.selectedItems = this.items_[this.defaultIndex || 0];
+              // 默认选项设置完成后同步更改绑定的数据源
+              this._updateModels();
+            }
+            else {
+              // 下拉内容发生变化，同步可能影响到下拉选中内容，需要同步状态
+              this._setSelectedItems();
+            }
           }
         }
       },
@@ -196,10 +210,13 @@
       }
     },
     methods: {
+      // 设置下拉内容
+      setItems(items){
+
+      },
       // 设置选中项
       setSelection(items){
         items = this._convertArray(items);
-
       },
       // 添加选中项
       addSelection (item) {
@@ -213,9 +230,7 @@
         } else {
           selections = [item];
         }
-        let value = this.multiple ? selections : selections[0];
-        let {model} = this._updateModels(value);
-        this.$emit("on-change", model, {component: this, des: "add"});
+        this._updateModels();
       },
       //移除选中项
       removeSelection (item) {
@@ -227,15 +242,13 @@
               return true;
             }
           });
-          let value = this.multiple ? (selections.length ? selections : null) : selections[0];
-          let {model} = this._updateModels(value);
-          this.$emit("on-change", model, {component: this, des: "remove"});
+          this._updateModels();
         }
       },
       // 移除全部选项
       removeAll(){
-        let {model} = this._updateModels(this.selectedItems = null);
-        this.$emit("on-change", model, {component: this, des: "remove"});
+        this.selectedItems = null;
+        this._updateModels();
       },
       //展开下拉，定位搜索框
       expand () {
@@ -285,11 +298,14 @@
         }
         this.searchResult = filterItems;
       },
-      // 下拉项选中数据的字段映射方式
-      _updateModels(v){
+      /**下拉项选中数据改变后，同步更改外部绑定的字段。
+       * 使用：selectedItems
+       * */
+      _updateModels(){
         // 根据mapField的规则，是否需要把选中
-        var map = this.map, labelField = this.labelField, valueField = this.valueField,
-          labels, values, model = v, modelType;
+        var selections = this.selectedItems, map = this.map, labelField = this.labelField, valueField = this.valueField,
+          labels, values, model, modelType;
+        let v = selections && (this.multiple ? (selections.length ? selections : null) : selections[0]);
         if (map) {
           if (v) {
             modelType = this.model;
@@ -318,15 +334,20 @@
           }
           // 3. model使用默认方式
           else {
+            model = v;
             this._set(map, "label", labels);
             this._set(map, "value", values);
           }
         }
-        return {model, label: labels, value: values}
+        this.$emit("on-change", values, this);
+        this.$emit("on-model-change", model, this);
       },
-      /**设置下拉选中项。
+      /**外部数据发生变化，同步设置下拉选中项。
+       * 引起变化的数据分别是：v-model，values，labels，value(下拉数据)
+       * 设置：selectedItems
        * 默认情况下，同时设置value和label。绑定的数据中没有和value对应的label，优先从下拉数据中查找和value对应的label，没有才使用绑定的label
        * value和label映射2个字段一前一后被赋值并且先后不定，设置primary参数可允许一个一个改变
+       * defaultIndex：如果下拉的value为空，启用默认选中项，索引从0开始
        * @param primary
        *        "value"：只设置value字段。即使当前存在value，也可以直接改变显示的label。不会改变下拉数据中和value对应的label
        *        "label"：只设置label字段。即使当前存在value，也可以直接改变显示的label。不会改变下拉数据中和value对应的label
@@ -366,7 +387,10 @@
           // 设置了value，label的值可能会发生改变，需要label的值同步到响应的字段
           if (!primary) {
             let labelValue = this.multiple ? labels : labels[0];
-            modelType == "value" ? this._set(map, "label", labelValue) : this.$emit("on-change", labelValue, {component: this, des: "change"})
+            modelType == "value" ? this._set(map, "label", labelValue) : this.$emit("on-model-change", labelValue, {
+              target: this,
+              des: "change"
+            })
           }
           this.selectedItems = items;
         } else {
@@ -508,7 +532,6 @@
     created () {
       // 组件初始化，prop和v-model绑定的数据在set访问器创建之前已经注入进来。一些需要转换格式的数据需手动调用数据转换方法
       this.items = this.value;
-      this._setSelectedItems();
       this._watchMap();
     },
     mounted () {
