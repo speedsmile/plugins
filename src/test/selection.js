@@ -30,15 +30,8 @@ window.vm = new Vue({
         }
       ]
     },
-    items: [
-      {"key": "1", "text": "北京"}, {"key": "2", "text": "上海"}, {"key": "3", "text": "广州"}, {
-        "key": "4",
-        "text": "深圳"
-      }, {"key": "5", "text": "天津"}, {"key": "6", "text": "重庆"}
-      ],
-    selectedItems: [
-      {"key": "1", "text": "北京"}, {"key": "2", "text": "上海"}, {"key": "3", "text": "广州"}
-    ]
+    items: [{"value":"1","label":"北京"},{"value":"2","label":"上海"},{"value":"3","label":"广州"},{"value":"4","label":"深圳"},{"value":"5","label":"天津"},{"value":"6","label":"重庆"}],
+    selectedItems: [{"value":"1","label":"北京"},{"value":"2","label":"上海"},{"value":"3","label":"广州"}]
   },
   methods: {
     filter(v, cb){
