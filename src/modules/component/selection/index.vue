@@ -37,13 +37,8 @@
           <!--</focus-panel>-->
         </div>
         <!-- 下拉列表区域 -->
-        <ul class="list" v-show="!searchKeywords">
-          <li v-for="item in items" :class="{selected: isSelected(item)}" @click="itemClick(item)">
-            <a class="link" href="javascript:;">{{item[labelField]}}</a>
-          </li>
-        </ul>
-        <ul class="list" v-show="searchKeywords">
-          <li v-for="item in searchResult" :class="{selected: isSelected(item)}" @click="itemClick(item)">
+        <ul class="list">
+          <li v-for="item in listItems" :class="{selected: isSelected(item)}" @click="itemClick(item)" :title="item[labelField]">
             <a class="link" href="javascript:;">{{item[labelField]}}</a>
           </li>
         </ul>
@@ -195,6 +190,10 @@
         set(v){
           this.searchResult_ = this._convert(v);
         }
+      },
+      // 下拉列表最终显示的数据。如果有搜索结果，优先展示搜索结果，反之展示原本的下拉
+      listItems: function(){
+          return this.searchKeywords ? this.searchResult : this.items
       }
     },
     watch: {
