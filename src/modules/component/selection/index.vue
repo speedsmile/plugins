@@ -126,13 +126,12 @@
           return this.items_;
         },
         set: function (v) {
-          if (v != this.items_) {
-            this.items_ = this._convert(v);
+          let {eq, newData} = this._eq(v, this.items_);
+          this.items_ = newData;
+          if (!eq) {
             // 设置默认选项
             if (this.items_ && (!this.selectedItems || !this.selectedItems.length) && this.defaultIndex !== null) {
               this.selectedItems = this.items_[this.defaultIndex || 0];
-              // 默认选项设置完成后同步更改绑定的数据源
-              this._updateModels();
             }
             else {
               // 下拉内容发生变化，同步可能影响到下拉选中内容，需要同步状态
@@ -147,9 +146,11 @@
           return this.selectedItems_;
         },
         set: function (v) {
-          if (v != this.selectedItems_) {
-            var selectedItems = this._convert(v);
-            this.selectedItems_ = this.multiple ? selectedItems : selectedItems.slice(0, 1);
+          let {eq, newData} = this._eq(v, this.selectedItems_);
+          this.selectedItems_ = this.multiple ? newData : newData.slice(0, 1);
+          if (!eq) {
+            // 默认选项设置完成后同步更改绑定的数据源
+            this._updateModels();
           }
         }
       },
@@ -201,7 +202,12 @@
         this.items = this.value
       },
       vModel: function () {
-        this.model == "label" ? this._setSelectedItems("label") : this._setSelectedItems();
+          // label变化不触发change
+        if(this.model == "label"){
+            this._setSelectedItems("label");
+        }else {
+          this._setSelectedItems()
+        }
       }
     },
     methods: {
@@ -239,7 +245,6 @@
       // 移除全部选项
       removeAll(){
         this.selectedItems = null;
-        this._updateModels();
       },
       //展开下拉，定位搜索框
       expand () {
@@ -345,7 +350,6 @@
         /**设置初始选中的下拉选项
          * 如果设置了mapField字段，优先vModel
          * */
-
         let items, labelMap = this._parseContext(this.labelModel), valueMap = this._parseContext(this.valueModel),
           modelType = this.model,
           values = [], labels = [],
@@ -357,8 +361,6 @@
         _values = this._convertArray(_values);
         _labels = this._convertArray(_labels);
         let arr = [];
-        /**
-         * */
         for (let i = 0, l = primary ? _labels.length : Math.max(_values.length, _labels.length); i < l; i++) {
           // 只设置label，value保持原来的不变
           let item = primary ? {
@@ -375,10 +377,7 @@
         // 设置了value，label的值可能会发生改变，需要label的值同步到响应的字段
         if (!primary) {
           let labelValue = this.multiple ? labels : labels[0];
-          modelType == "value" ? this._set("label", labelValue) : this.$emit("on-model-change", labelValue, {
-            target: this,
-            des: "change"
-          })
+          modelType == "value" ? this._set("label", labelValue) : this.$emit("on-model-change", labelValue, this)
         }
         this.selectedItems = items;
       },
@@ -395,6 +394,19 @@
        *   进行数据上的相等判断，防止陷入死循环
        * */
       _eq(newData, oldData){
+        let eq = true;
+          newData = this._convert(newData);
+        oldData = this._convert(oldData);
+        if(newData.length != oldData.length)eq = false;
+        else{
+            for(let i in newData){
+                if(newData[i][this.valueField] != oldData[i][this.valueField]){
+                    eq = false;
+                    break;
+                }
+            }
+        }
+        return {eq, newData, oldData};
       },
       // 监听map中的变化
       _watchMap(){
@@ -403,14 +415,14 @@
         // 监听label的变化
         if (labelMap) {
           this.context.$watch(labelMap, (...args) => {
-            console.log(...args)
+            console.log("labelMap:",...args)
             this._setSelectedItems("label")
           });
         }
         // 监听value的变化
         if (valueMap) {
           this.context.$watch(valueMap, (...args) => {
-            console.log(...args)
+            console.log("valueMap:",...args)
             this._setSelectedItems()
           });
         }

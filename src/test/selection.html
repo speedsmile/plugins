@@ -11,8 +11,8 @@
           <selection v-model="editData.selection" :value="items"  placeholder="请选择"
                      :filter-method="filter" clearable multiple
                      default-index
-                     :context="this" label-model="labels"
-                     @on-open="log('open')" @on-close="log('close')"
+                     :context="this" value-model="labels" model="label"
+                     @on-change="log('change')"
           ></selection>
         </form-item>
         <form-item label="select" prop="select">

@@ -24,6 +24,7 @@ window.vm = new Vue({
           trigger: 'change',
           message: "不能为空",
           validator: function(rule, value, callback){
+            console.log("change = " + value)
             if(value)callback();
             else callback(rule.message)
           }
@@ -40,7 +41,7 @@ window.vm = new Vue({
     formChange: function(){
     },
     log(){
-      // console.log.apply(console, arguments)
+      console.log.apply(console, arguments)
     }
   },
   mounted(){
