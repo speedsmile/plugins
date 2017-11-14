@@ -224,10 +224,10 @@
           selections.every(function (i) {
             return item[valueField] != i[valueField];
           }) && selections.push(item);
+          this._updateModels();
         } else {
-          selections = [item];
+          this.selectedItems = [item];
         }
-        this._updateModels();
       },
       //移除选中项
       removeSelection (item) {
