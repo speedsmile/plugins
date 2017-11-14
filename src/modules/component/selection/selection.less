@@ -30,7 +30,6 @@
 }
 .m-selection() {
   .selection, .drop-list {
-    font-size: @normal-size;
     color: @font-color;
     i {
       font-style: normal;
@@ -73,6 +72,7 @@
     position: relative;
     display: inline-block;
     width: 100%;
+    font-size: @normal-size;
     line-height: 1;
     border: 1px solid @gray-border;
     border-radius: @radius;
@@ -120,7 +120,7 @@
       display: none;
       z-index: 1;
       top: 50%;
-      right: 10px;
+      right: 9px;
       margin-top: @size / -2;
       width: @size;
       height: @size;
@@ -134,7 +134,7 @@
     .icon-drop {
       position: absolute;
       top: 50%;
-      right: 6px;
+      right: 4px;
       margin-top: -3px;
       width: 12px;
       height: 5px;
@@ -159,19 +159,20 @@
       transform: rotate(180deg);
     }
     .selection-list {
-      padding-right: 20px; //预留位置给下拉箭头
+      padding-right: 22px; //预留位置给下拉箭头
       height: 100%;
     }
     .selection-item {
       position: relative;
       display: inline-block;
       margin: 4px;
-      padding-left: @control-padding-tb + 2;
+      padding: 0 @control-padding-tb + 2;
       line-height: 19px;
       background-color: #f7f7f7;
       border: 1px solid @gray-border;
       border-radius: 3px;
       cursor: pointer;
+      word-break: break-all;
       &:hover {
         opacity: .85;
       }
@@ -190,6 +191,7 @@
       margin-top: 1px;
       width: 100%;
       max-height: 260px;
+      font-size: @small-size;
       overflow: auto;
     }
     .search-input {
@@ -223,7 +225,7 @@
     @padding: 15px 25px;
     position: absolute;
     z-index: 100;
-    padding-bottom: 5px;
+    padding: 5px 0;
     border: 1px solid @gray-border;
     border-radius: @radius;
     background-color: #fff;
