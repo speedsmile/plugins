@@ -5,7 +5,7 @@
     <div class="selection-area" @click="toggle">
       <!-- 选中的下拉选项 -->
       <ul class="selection-list" v-if="selectedItems && selectedItems.length">
-        <li v-for="item in selectedItems" class="selection-item">
+        <li v-for="item in selectedItems" class="selection-item" :title="item[labelField]">
           <a href="javascript:void(0)">{{item[labelField]}}</a>
           <i class="icon-deselect" @click.stop="removeSelection(item)">&times;</i>
         </li>
@@ -38,7 +38,8 @@
         </div>
         <!-- 下拉列表区域 -->
         <ul class="list">
-          <li v-for="item in listItems" :class="{selected: isSelected(item)}" @click="itemClick(item)" :title="item[labelField]">
+          <li v-for="item in listItems" :class="{selected: isSelected(item)}" @click="itemClick(item)"
+              :title="item[labelField]">
             <a class="link" href="javascript:;">{{item[labelField]}}</a>
           </li>
         </ul>
@@ -192,8 +193,8 @@
         }
       },
       // 下拉列表最终显示的数据。如果有搜索结果，优先展示搜索结果，反之展示原本的下拉
-      listItems: function(){
-          return this.searchKeywords ? this.searchResult : this.items
+      listItems: function () {
+        return this.searchKeywords ? this.searchResult : this.items
       }
     },
     watch: {
@@ -201,49 +202,45 @@
         this.items = this.value
       },
       vModel: function () {
-          // label变化不触发change
-        if(this.model == "label"){
-            this._setSelectedItems("label");
-        }else {
+        // label变化不触发change
+        if (this.model == "label") {
+          this._setSelectedItems("label");
+        } else {
           this._setSelectedItems()
         }
       }
     },
     methods: {
-      // 设置选中项
-      setSelection(items){
-        items = this._convertArray(items);
-      },
       // 添加选中项
       addSelection (item) {
-        var selections = this.selectedItems;
+        let selections = this.selectedItems, valueField = this.valueField, selectedValue;
         if (this.multiple) {
-          let valueField = this.valueField;
+          selectedValue = [];
           //不能重复添加同一个选中项
-          selections.every(function (i) {
-            return item[valueField] != i[valueField];
-          }) && selections.push(item);
+          selections.every(i=>item[valueField] != i[valueField]
+          ) && (selections.push(item), selectedValue.push(item[valueField]));
           this._updateModels();
         } else {
           this.selectedItems = [item];
+          selectedValue = item[valueField]
         }
+        this.$emit("on-change", selectedValue, this)
       },
       //移除选中项
       removeSelection (item) {
-        if (this.mode == 1) {
-          let selections = this.selectedItems, valueField = this.valueField;
-          selections.some(function (i, index) {
-            if (item[valueField] == i[valueField]) {
-              selections.splice(index, 1);
-              return true;
-            }
-          });
-          this._updateModels();
-        }
+        let selections = this.selectedItems, valueField = this.valueField;
+        selections.some(function (i, index) {
+          if (item[valueField] == i[valueField]) {
+            selections.splice(index, 1);
+            return true;
+          }
+        });
+        this.$emit("on-change", this._updateModels().values, this);
       },
       // 移除全部选项
       removeAll(){
         this.selectedItems = null;
+        this.$emit("on-change", null, this)
       },
       //展开下拉，定位搜索框
       expand () {
@@ -333,7 +330,8 @@
           this._set("value", values);
         }
         this.$emit("on-model-change", model, this);
-        this.$emit("on-change", values, this);
+        this.$emit("on-value-change", values, this);
+        return {model, labels, values};
       },
       /**外部数据发生变化，同步设置下拉选中项。
        * 引起变化的数据分别是：v-model，values，labels，value(下拉数据)
@@ -394,16 +392,16 @@
        * */
       _eq(newData, oldData){
         let eq = true;
-          newData = this._convert(newData);
+        newData = this._convert(newData);
         oldData = this._convert(oldData);
-        if(newData.length != oldData.length)eq = false;
-        else{
-            for(let i in newData){
-                if(newData[i][this.valueField] != oldData[i][this.valueField]){
-                    eq = false;
-                    break;
-                }
+        if (newData.length != oldData.length) eq = false;
+        else {
+          for (let i in newData) {
+            if (newData[i][this.valueField] != oldData[i][this.valueField]) {
+              eq = false;
+              break;
             }
+          }
         }
         return {eq, newData, oldData};
       },
@@ -414,14 +412,12 @@
         // 监听label的变化
         if (labelMap) {
           this.context.$watch(labelMap, (...args) => {
-            console.log("labelMap:",...args)
             this._setSelectedItems("label")
           });
         }
         // 监听value的变化
         if (valueMap) {
           this.context.$watch(valueMap, (...args) => {
-            console.log("valueMap:",...args)
             this._setSelectedItems()
           });
         }
@@ -524,6 +520,7 @@
     },
     created () {
       // 组件初始化，prop和v-model绑定的数据在set访问器创建之前已经注入进来。一些需要转换格式的数据需手动调用数据转换方法
+      this._setSelectedItems();
       this.items = this.value;
       this._watchMap();
     },

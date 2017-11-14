@@ -11,7 +11,7 @@ window.vm = new Vue({
   data: {
     labels: null,
     editData: {
-      selection: null,
+      selection: 2,
       labels: null,
       values: null
     },
