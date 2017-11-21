@@ -99,6 +99,7 @@
        其它: {label, value},多选模式下[{label, value}]
        * */
       model: {default: "value"},
+      clearModel: {default: null},
       // 是否多选
       multiple: {default: false},
       // 是否显示清除
@@ -195,6 +196,9 @@
       // 下拉列表最终显示的数据。如果有搜索结果，优先展示搜索结果，反之展示原本的下拉
       listItems: function () {
         return this.searchKeywords ? this.searchResult : this.items
+      },
+      clearModel_: function(){
+          return this.clearModel === "" ? "destroyed" : this.clearModel;
       }
     },
     watch: {
@@ -243,6 +247,7 @@
         this.$emit("on-change", null, this)
       },
       //展开下拉，定位搜索框
+      // Todo 展开下拉，选中项的对应数据要显示在看得见的地方
       expand () {
         if (this.mode == 1 && this.status != "expand") {
           this.status = "expand";
@@ -276,15 +281,15 @@
         this.multiple === false && this.collapse();
       },
       isSelected (item) {
-        var valueField = this.valueField;
+        let valueField = this.valueField;
         return this.selectedItems && this.selectedItems.some(function (selectionItem) {
             return selectionItem[valueField] == item[valueField];
           });
       },
       // 本地数据过滤的默认方法
       localFilter(){
-        var v = this.searchKeywords, items = this.items, filterItems = [], itemLabel;
-        for (var i in items) {
+        let v = this.searchKeywords, items = this.items, filterItems = [], itemLabel;
+        for (let i in items) {
           itemLabel = items[i][this.labelField];
           itemLabel != null && (itemLabel.toString().indexOf(v) > -1) && filterItems.push(items[i]);
         }
@@ -347,12 +352,12 @@
         /**设置初始选中的下拉选项
          * 如果设置了mapField字段，优先vModel
          * */
+        if(this.status == "beforeDestroy" || this.status == "destroyed")return
         let items, labelMap = this._parseContext(this.labelModel), valueMap = this._parseContext(this.valueModel),
           modelType = this.model,
           values = [], labels = [],
           _values = valueMap && valueMap.context[valueMap.field],
           _labels = labelMap && labelMap.context[labelMap.field];
-
         if (modelType == "value") _values = this.vModel;
         else if (modelType == "label") _labels = this.vModel;
         _values = this._convertArray(_values);
@@ -385,6 +390,21 @@
           context[field] = value;
         }
       },
+      // 把绑定的label和value都设置成null
+      _clearModel(){
+        let modelType = this.model;
+        // 1. model替代value
+        if (modelType == "value") {
+            let labelMap = this._parseContext(this.labelModel);
+          labelMap && (labelMap.context[labelMap.field] = null);
+        }
+        // 2. model替代label
+        else if (modelType == "label") {
+          let valueMap = this._parseContext(this.valueModel);
+          valueMap && (valueMap.context[valueMap.field] = null);
+        }
+        this.$emit("on-model-change", null, this);
+      },
       /**判断新旧数据在数据的角度上是否相等。
        * 比如在程序上，[1]不等于[1]；但在数据上视为相等。
        * 使用场景：变量发生变化执行了数据加工方法后重新使用新的变量改变原始变量，会再次触发变量修改事件
@@ -408,15 +428,19 @@
       // 监听map中的变化
       _watchMap(){
         let labelMap = this.labelModel, valueMap = this.valueModel;
+        // 是否有重复的监听
+        function find(context, field){
+            return context._watchers.some(watcher => watcher.expression === field)
+        }
         // vModel是可响应的，
         // 监听label的变化
-        if (labelMap) {
+        if (labelMap && !find(this.context, labelMap)) {
           this.context.$watch(labelMap, (...args) => {
             this._setSelectedItems("label")
           });
         }
         // 监听value的变化
-        if (valueMap) {
+        if (valueMap && !find(this.context, valueMap)) {
           this.context.$watch(valueMap, (...args) => {
             this._setSelectedItems()
           });
@@ -490,7 +514,7 @@
         let $context = this.context;
         // 直接挂在根元素下的字段没有作用域表达式
         if (!expr)return;
-        if (!$context) throw Error("属性[value|label]-map参数不正确，context和context都是必须的");
+        if (!$context) throw Error("属性context是必须的");
         let arr = expr.split("."), head, context = $context;
         for (let i = 0, l = arr.length; i < l - 1; i++) {
           // 表达式中的上游路径的对象不存在，默认补成{}
@@ -527,12 +551,19 @@
     mounted () {
       var vue = this, $refs = this.$refs, list = $refs.list;
       list.addFocusEvent(this.$el);
-      list.$on("on-expand", function (e) {
-        vue.expand();
-      });
-      list.$on("on-collapse", function (e) {
-        vue.collapse();
-      });
+      list.$on("on-expand", function () {vue.expand()});
+      list.$on("on-collapse", function () {vue.collapse()});
+    },
+    beforeDestroy(){
+      this.status = "beforeDestroy";
+      this.$emit("on-before-destroy", this);
+    },
+    destroyed(){
+        this.status = "destroyed";
+      if(this.clearModel_ == "destroyed"){
+          this._clearModel();
+      }
+      this.$emit("on-destroyed", this);
     }
   };
 </script>

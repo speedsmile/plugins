@@ -9,6 +9,7 @@ Vue.component(selection.name, selection);
 window.vm = new Vue({
   el: "#app",
   data: {
+    i:1,
     labels: null,
     editData: {
       selection: 2,
@@ -42,6 +43,9 @@ window.vm = new Vue({
     },
     log(){
       console.log.apply(console, arguments)
+    },
+    des(){
+      debugger;
     }
   },
   mounted(){
