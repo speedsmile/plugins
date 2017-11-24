@@ -2,7 +2,7 @@ import $ from "jquery";
 import Vue from "vue";
 import "iview/dist/styles/iview.css";
 import Iview from "iview";
-import selection from "@modules/component/selection";
+import selection from "@components/selection";
 window.$ = window.jQuery = $;
 Vue.use(Iview);
 Vue.component(selection.name, selection);

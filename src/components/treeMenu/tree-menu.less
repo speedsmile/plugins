@@ -1,0 +1,90 @@
+.tree-menu{
+  @sub-indent: 20px;
+  font-size: 14px;
+  &.tree-list-root{
+    >.tree-node{
+      padding-left: 0;
+    }
+  }
+  .tree-node{
+    color: #a8acb1;
+  }
+  .tree-item{
+    padding: 14px 10px;
+    cursor: pointer;
+    &:hover{
+      .m-selected;
+    }
+    .icon {
+      margin-right:8px;
+    }
+  }
+  .leaf-node{
+    &:hover, &.select-node{
+      >.tree-item{
+        .m-leaf-selected;
+      }
+    }
+  }
+  .open-node{
+    >.tree-item{
+      .m-selected;
+      .node-arrow{
+        transform: rotate(180deg);
+      }
+    }
+  }
+  .m-indent;
+  // 节点展开收起的箭头
+  .node-arrow{
+    position: relative;
+    top: 4px;
+    float: right;
+  }
+  .m-border-line;
+  // 动画过渡
+  .node-text, .icon, .node-arrow{
+    transition: all .2s ease-in-out;
+  }
+  /*********** mixin start *****************/
+  // 普通节点选中的样式
+  .m-selected(){
+    color: #fff;
+    background-color: #348fe2;
+  }
+  // 叶节点选中的样式
+  .m-leaf-selected(){
+    color: #fff;
+    background-color: #348fe2;
+    //.icon{
+    //  color: #348fe2;
+    //}
+  }
+
+  // 树菜单的分割线
+  .m-border-line(){
+    .tree-item{
+      position: relative;
+      &:after{
+        content: "";
+        position: absolute;
+        left: 0;
+        bottom: 0;
+        width: 100%;
+        border-bottom: 1px solid #54606a;
+      }
+    }
+  }
+  /* 递归创建N级嵌套的树菜单的缩进 */
+  @n: 6;
+  .m-indent(@l:0)when(@l < @n){
+    .tree-sub {
+      .tree-content{
+        padding-left: @sub-indent * (@l + 1);
+      }
+      .m-indent(@l+1)
+    }
+  }
+  // 必须存在，否则当@l==@n时会发生匹配不上的异常
+  .m-indent(@l)when(@l = @n){}
+}
