@@ -1,5 +1,4 @@
-export default (function () {
-
+export default function ($) {
   var pluses = /\+/g;
 
   function encode(s) {
@@ -96,4 +95,4 @@ export default (function () {
     return !$.cookie(key);
   };
 
-}())
+};
