@@ -1,0 +1,8 @@
+{
+  "name": "cssunit",
+  "version": "0.0.1",
+  "description": "作为postcss的插件来转换css单位，比如从A(px)转B(rem)，可以自定义单位的转换规则",
+  "dependencies": {
+    "postcss": "^6.0.14"
+  }
+}
