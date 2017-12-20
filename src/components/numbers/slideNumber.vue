@@ -79,6 +79,9 @@
         this.data != null && (this.num = this.data);
       }
     },
+    created(){
+      this.data != null && (this.num = this.data);
+    },
     extends: Transition
   }
 </script>
