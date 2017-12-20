@@ -10,11 +10,14 @@
                       @enter="enter"
                       @leave="leave"
     >
-      <div v-for="(num,i) in numString" :key="i" class="num-view">
-        <div class="nums-wrapper" :style="{top:-num+'00%'}">
-          <div class="single-num" v-for="n in 10" v-text="n-1"></div>
+      <template v-for="(num,i) in numString">
+        <div class="num-view" :key="i" v-if="isNumber(num)">
+          <div class="nums-wrapper" :style="{top:-num+'00%'}">
+            <div class="single-num" v-for="n in 10" v-text="n-1"></div>
+          </div>
         </div>
-      </div>
+        <div v-else :key="i" class="comma">{{num}}</div>
+      </template>
     </transition-group>
   </div>
 </template>
@@ -47,51 +50,46 @@
   };
   export default{
     name: "slide-number",
-    props: ["data", "char", "minlength"],
+    props: ["data", "char", "minlength", "termRule"],
     data: function () {
       return {num: null}
+    },
+    methods: {
+      isNumber(n){
+        return n != null && !isNaN(n)
+      }
     },
     computed: {
       /**数字分开显示，返回数字的字符串。不足指定为数的补0
        * */
       numString(){
         var num = this.num;
-        if(num == null)return;
+        if (num == null)return;
         var minlength = this.minlength != null ? this.minlength : 5,
-            char = this.char != null ? this.char : "0";
+          char = this.char != null ? this.char : "0";
         num += "";
-        for(var i = 0, l = minlength - num.length; i < l; i++){
+        for (var i = 0, l = minlength - num.length; i < l; i++) {
           num = char + num;
         }
-        return num;
+        return this.termRule ? this.termRule(num) : num;
       }
     },
-    beforeUpdate: function(){
-      var data = this.data;
-      if(data){
-        data.num != null && (this.num = data.num);
+    watch: {
+      "data": function () {
+        this.data != null && (this.num = this.data);
       }
     },
     extends: Transition
   }
 </script>
-<style lang="less" scoped>
+<style lang="less">
   @width: .65em;
   @height: 1em;
   @gap: 22REM;
   .slide-number {
     display: flex;
     align-items: center;
-    margin-bottom: 100REM;
-    &:last-child {
-      margin-bottom: 100REM;
-    }
-    > .title {
-      margin-right: 50REM;
-      font-size: 60REM;
-    }
   }
-
   .num-group {
     display: flex;
     margin-left: 0;
@@ -100,26 +98,23 @@
     line-height: 1em;
     color: #fff;
   }
-
+  .num-view {
+    margin-right: @gap;
+    overflow-y: hidden;
+  }
   .single-num {
     margin-right: 0;
+    text-align: center;
+    background: #030c2e;
   }
-
-  .num-view, .single-num {
-    margin-right: @gap;
+  .nums-wrapper {
+    position: relative;
+    transition: all 1s .5s ease;
+  }
+  .nums-wrapper, .single-num {
     width: @width;
     height: @height;
     line-height: @height;
-    background: #030c2e;
-  }
-
-  .num-view {
-    position: relative;
-    overflow: hidden;
-    .nums-wrapper {
-      position: absolute;
-      transition: all 1s .5s ease;
-    }
   }
 
   .alternate {
