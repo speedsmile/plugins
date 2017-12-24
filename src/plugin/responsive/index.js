@@ -37,8 +37,11 @@ module.exports = function(baseSize){
     window.responser = {
       /**根据设计稿理想尺寸和设备实际尺寸的比例，等比计算出理想尺寸所对应的设备尺寸
        * */
-      responseSize: function(size, reverse){
-        return reverse ? size * (base / terminal) : size / (base / terminal);
+      responseSize: function(size, {reverse, max, min}){
+        var size = reverse ? size * (base / terminal) : size / (base / terminal);
+        max != undefined && (size = Math.min(size, max)); // 设置了最大尺寸
+        min != undefined && (size = Math.max(size, min)); // 设置了最小尺寸
+        return size;
       }
     };
   }

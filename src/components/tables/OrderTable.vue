@@ -34,7 +34,7 @@
     @font-size: 36REM;
     @padding-lr: 25REM;
     @cell-height: 52REM;
-    width: 506REM;
+    width: 100%;
     caption {
       position: relative;
       font-size: @font-size;

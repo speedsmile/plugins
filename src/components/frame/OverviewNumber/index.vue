@@ -1,7 +1,10 @@
 <template>
   <div class="overview-num">
-    <div class="content">
-      <slot></slot>
+    <div class="bg-img"></div>
+    <div class="table-cell">
+      <div class="content">
+        <slot></slot>
+      </div>
     </div>
   </div>
 </template>
@@ -10,15 +13,31 @@
     @width: 616REM;
     @height: 300REM;
     @padding-lr: 58REM;
+    @padding-lr-2: @padding-lr * 2;
+    @padding-top: 60REM;
+    @padding-bottom: 45REM;
     @bottom: 94REM;
-    display: table-cell;
-    width: @width;
+    position: relative;
+    display: table;
+    width: 100%;
     height: @height;
-    padding-bottom: @bottom;
-    text-align: center;
-    vertical-align: bottom;
-    background: url("overview-num.png") no-repeat center/contain;
+    .bg-img{
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      padding: @padding-top @padding-lr @padding-bottom;
+      width: calc(~"100% + @{padding-lr-2}");
+      height: 100%;
+      background: url(overview-num.png) no-repeat center/100%;
+    }
+    .table-cell{
+      display: table-cell;
+      text-align: center;
+      vertical-align: middle;
+    }
     .content{
+      position: relative; // 内容要定位，不然会被绝对定位的背景层挡住
       display: inline-block;
       max-width: @width - @padding-lr * 2;
       .small-info{
@@ -26,7 +45,6 @@
         font-size: 14REM;
         line-height: 1;
         color: #fff;
-        text-align: right;
       }
     }
     .slide-number{
