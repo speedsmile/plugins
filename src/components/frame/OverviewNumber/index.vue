@@ -1,6 +1,7 @@
 <template>
   <div class="overview-num">
-    <div class="bg-img"></div>
+    <!--<div class="bg-img"></div>-->
+    <img src="./overview-num.png" alt="" class="bg-img">
     <div class="table-cell">
       <div class="content">
         <slot></slot>
@@ -13,23 +14,22 @@
     @width: 616REM;
     @height: 300REM;
     @padding-lr: 58REM;
-    @padding-lr-2: @padding-lr * 2;
     @padding-top: 60REM;
     @padding-bottom: 45REM;
+    @add-width: @padding-lr * 2;
+    @add-height: @padding-top + @padding-bottom;
     @bottom: 94REM;
     position: relative;
     display: table;
+    padding: @padding-top @padding-lr @padding-bottom;
     width: 100%;
-    height: @height;
     .bg-img{
       position: absolute;
       top: 50%;
       left: 50%;
       transform: translate(-50%, -50%);
-      padding: @padding-top @padding-lr @padding-bottom;
-      width: calc(~"100% + @{padding-lr-2}");
-      height: 100%;
-      background: url(overview-num.png) no-repeat center/100%;
+      width: (@width + @add-width) / @width * 100%;
+      height: (@height + @add-height) / @height * 100%;
     }
     .table-cell{
       display: table-cell;
@@ -39,7 +39,6 @@
     .content{
       position: relative; // 内容要定位，不然会被绝对定位的背景层挡住
       display: inline-block;
-      max-width: @width - @padding-lr * 2;
       .small-info{
         margin-bottom: 15REM;
         font-size: 14REM;
