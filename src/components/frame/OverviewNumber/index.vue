@@ -1,6 +1,5 @@
 <template>
   <div class="overview-num">
-    <!--<div class="bg-img"></div>-->
     <img src="./overview-num.png" alt="" class="bg-img">
     <div class="table-cell">
       <div class="content">
