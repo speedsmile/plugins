@@ -12,7 +12,7 @@
     >
       <template v-for="(num,i) in numString">
         <div class="num-view" :key="i" v-if="isNumber(num)">
-          <div class="nums-wrapper" :style="{top:-num+'00%'}">
+          <div class="nums-wrapper" :style="{top:-num+'em'}">
             <div class="single-num" v-for="n in 10" v-text="n-1"></div>
           </div>
         </div>
