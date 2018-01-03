@@ -6,7 +6,7 @@ module.exports = function(baseSize){
   var bw = "width", bh = "height",
     scaleRatio = 1,
     baseRatio = baseSize[bw] / baseSize[bh],
-    base = baseSize[bw]; //window.innerWidth < window.innerHeight ? baseWidth : baseHeight
+    baseWidth = baseSize[bw]; //window.innerWidth < window.innerHeight ? baseWidth : baseHeight
   function setBase(){
     /**基准 * 页面宽度 / 设计稿宽度
      * 设计稿： 750 * 1334
@@ -24,28 +24,29 @@ module.exports = function(baseSize){
     var rootEl = (document.documentElement || document.body),
       terminalRatio = window.innerWidth / window.innerHeight,
       terminal, rem;
-    /**比较理想尺寸和设备实际的宽高比，保持理想尺寸的高宽比
-     * 如果实际比例大于理想比例（实际的高度小于比例高度），以实际高度为基准，根据比例计算出应有的宽度
+    /**为了保证实际尺寸的比例和理想尺寸的比例一致，以实际宽高中较小的值最为基数，按比例计算出另一个基准数
+     * 以宽度/高度为基准比例，实际比例大于理想比例，说明实际的高度较小，应该根据高度反推算出宽度
      */
     if(terminalRatio > baseRatio){
       terminal = window.innerHeight * baseRatio;
     }else{
       terminal = window.innerWidth
     }
-    rem = 100 * (terminal / base);
+    rem = 100 * (terminal / baseWidth);
     rootEl.style.fontSize = rem + "px";
     window.responser = {
       /**根据设计稿理想尺寸和设备实际尺寸的比例，等比计算出理想尺寸所对应的设备尺寸
        * */
       responseSize: function(size, option){
         var {reverse, max, min} = option || {},
-          size = reverse ? size * (base / terminal) : size / (base / terminal);
+          size = reverse ? size * (baseWidth / terminal) : size / (baseWidth / terminal);
         max != undefined && (size = Math.min(size, max)); // 设置了最大尺寸
         min != undefined && (size = Math.max(size, min)); // 设置了最小尺寸
         return size;
       }
     };
+    return {width: terminal, height: terminal / baseRatio}
   }
   window.addEventListener("resize", setBase);
-  setBase();
+  return setBase()
 };
