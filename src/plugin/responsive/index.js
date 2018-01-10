@@ -1,12 +1,10 @@
 /**处理页面响应式rem布局，越早调用越能减少页面抖动
- * @param baseSize Object {width: , height:}
  * Created by weikaiwei on 2017/12/18.
+ * @param Object {width: 设计稿的宽度, height: 设计稿的高度, scale: 1（默认）,等比例缩放}
+ *
  * */
-module.exports = function(baseSize){
-  var bw = "width", bh = "height",
-    scaleRatio = 1,
-    baseRatio = baseSize[bw] / baseSize[bh],
-    baseWidth = baseSize[bw]; //window.innerWidth < window.innerHeight ? baseWidth : baseHeight
+module.exports = function({width, height, minWidth, maxWidth, scale = 1}){
+  var baseWidth = width; //window.innerWidth < window.innerHeight ? baseWidth : baseHeight
   function setBase(){
     /**基准 * 页面宽度 / 设计稿宽度
      * 设计稿： 750 * 1334
@@ -22,30 +20,33 @@ module.exports = function(baseSize){
      * document.body.clientWidth是准确的
      * */
     var rootEl = (document.documentElement || document.body),
-      terminalRatio = window.innerWidth / window.innerHeight,
-      terminal, rem;
+      useWidth = window.innerWidth, useHeight, rem;
     /**为了保证实际尺寸的比例和理想尺寸的比例一致，以实际宽高中较小的值最为基数，按比例计算出另一个基准数
      * 以宽度/高度为基准比例，实际比例大于理想比例，说明实际的高度较小，应该根据高度反推算出宽度
      */
-    if(terminalRatio > baseRatio){
-      terminal = window.innerHeight * baseRatio;
-    }else{
-      terminal = window.innerWidth
+    if(scale){
+      var baseRatio = baseWidth / height, terminalRatio = window.innerWidth / window.innerHeight;
+      if(terminalRatio > baseRatio){
+        useWidth = window.innerHeight * baseRatio;
+      }
+      useHeight = useWidth / baseRatio
     }
-    rem = 100 * (terminal / baseWidth);
+    maxWidth != undefined && (useWidth = Math.min(useWidth, maxWidth)); // 设置了最大尺寸
+    minWidth != undefined && (useWidth = Math.max(useWidth, minWidth)); // 设置了最小尺寸
+    rem = 100 * (useWidth / baseWidth);
     rootEl.style.fontSize = rem + "px";
     window.responser = {
       /**根据设计稿理想尺寸和设备实际尺寸的比例，等比计算出理想尺寸所对应的设备尺寸
        * */
       responseSize: function(size, option){
         var {reverse, max, min} = option || {},
-          size = reverse ? size * (baseWidth / terminal) : size / (baseWidth / terminal);
+          size = reverse ? size * (baseWidth / useWidth) : size / (baseWidth / useWidth);
         max != undefined && (size = Math.min(size, max)); // 设置了最大尺寸
         min != undefined && (size = Math.max(size, min)); // 设置了最小尺寸
         return size;
       }
     };
-    return {width: terminal, height: terminal / baseRatio}
+    return {useWidth}
   }
   window.addEventListener("resize", setBase);
   return setBase()

@@ -1,0 +1,156 @@
+@import "var";
+@import "../common/mixin/fun";
+body{
+  color: @font-color;
+  background-color: #fff;
+}
+.fixed-header, .fixed-footer{
+  position: fixed;
+  z-index: 10; // 防止后面的元素的默认层级高过头部和尾部
+  padding: 0 @indent-lr;
+  width: 100%;
+  color: #fff;
+}
+.fixed-header{
+  z-index: 1000;
+  top: 0;
+  height: @header-height;
+  font-size: 32REM;
+  line-height: @header-height;
+  color: #fff;
+  background-color: #028be6;
+  .back{
+    position: absolute;
+    top: 0;
+    left: @indent-lr;
+    vertical-align: middle;
+    > i{
+      font-size: 1.5em;
+    }
+    > i, .back-text{
+      vertical-align: middle;
+    }
+  }
+  .header-text{
+    font-size: @title-size;
+    text-align: center;
+  }
+}
+.fixed-footer{
+  bottom: 0;
+  //padding-bottom: 12REM;
+  height: @footer-height;
+  border-top: 1px solid @border-color;
+  font-size: 24REM;
+  color: #929292;
+  background-color: #f7f7f7;
+  i{
+    display: block;
+    padding-bottom: 10REM;
+    font-size: 42REM;
+  }
+  .active a{
+    color: #007aff;
+  }
+}
+
+.main{
+  height: 100%;
+}
+/*  业务 */
+.group-dropdown{
+  font-size: 30REM;
+  >a{
+    color: #666;
+  }
+  .tri-down{
+    .tri(14REM, 8REM, top, #666);
+    display: inline-block;
+    margin: 0 10REM 0 -5REM;
+    vertical-align: middle;
+  }
+}
+.dropdown-menu{
+  @bg: rgba(51, 51, 51, .94);
+  margin-top: 10REM;
+  padding: 0;
+  min-width: 0; // bootstrap设置了min-width。 uc不支持auto
+  width: 278REM;
+  font-size: 32REM;
+  line-height: 1;
+  border: none;
+  &.tri:before{
+    content: "";
+    position: absolute;
+    top: -15REM;
+    left: 45REM;
+    .tri(30REM, 20REM, bottom, @bg);
+  }
+  >li{
+    border-bottom: 1px solid #000;
+    &:last-child{
+      border-bottom: none;
+    }
+    >a{
+      padding: 25REM 48REM;
+      line-height: 1;
+      color: #fff;
+    }
+  }
+  &.black{
+    background-color: @bg;
+  }
+}
+.autocomplete-list{
+  position: absolute;
+  z-index: 10;
+  top: 0;
+  left: 0;
+  padding-bottom: @footer-height;
+  width: 100%;
+  min-height: 100%;
+  background-color: #fff;
+}
+.main-content{
+  padding-top: @search-group-height;
+  padding-bottom: @footer-height;
+}
+.tip-wrap{
+  //position: absolute;
+  //z-index: 9;
+  //padding-bottom: @footer-height;
+  //width: 100%;
+  //background-color: #fff;
+}
+
+@top-space-height: 20REM;
+@tab-height: 84REM;
+header + .tab-container{
+  top: @header-height + @search-group-height;
+}
+.tab-container{
+  padding-top: @search-group-height;
+}
+.top-space{
+  padding-top: @top-space-height;
+  background-color: @default-bg;
+}
+.tool-bottom{
+  position: fixed;
+  right: 10px;
+  bottom: @footer-height + 20;
+}
+
+.loadmore-wrapper{
+  overflow: auto;
+}
+.loadmore-body{
+  min-height: 200px;
+}
+//不能使用伪元素，不能用 display:none; 或者 visibility: hidden;
+.vue-fix{
+  position: absolute;
+  width: 0;
+  height: 0;
+  opacity: 0;
+}

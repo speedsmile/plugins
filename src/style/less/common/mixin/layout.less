@@ -1,0 +1,129 @@
+/*布局样式集合。
+普通的排列布局
+  .group, block布局, 每个group和group之间具有一定的垂直间距
+  .inline-group, inline-block布局, 每个inline-group和inline-group之间具有一定的水平间距
+
+  .groups, block布局, 内部的直接子元素全部继承.inline-group的样式
+  .groups-block, block布局, 直接子元素全部是.group布局
+
+  .inline-groups, inline-block布局, 内部的直接子元素全部继承.inline-group的样式
+  .inline-groups-block, inline-block布局, 直接子元素全部是.group布局
+
+  块样式可以和块样式混用：.group, .groups, .groups-block
+    .group + .group, .groups + .groups, .groups-block + .groups-block,
+    .group + .groups, .group + .groups-block,
+    .groups + .group, .groups + .groups-block,
+    .groups-block + .group, .groups-block + .groups
+  行样式可以和行样式混用：.inline-group, .inline-groups, .inline-groups-block
+    .inline-group + .inline-group, .inline-groups + .inline-groups, .inline-groups-block + .inline-groups-block,
+    .inline-group + .inline-groups, .inline-group + .inline-groups-block,
+    .inline-groups + .inline-group, .inline-groups + .inline-groups-block,
+    .inline-groups-block + .inline-group, .inline-groups-block + .inline-groups
+
+flex布局
+  .flex-groups，flex布局，子元素垂直居中
+  .inline-flex-groups, inline-flex布局，子元素垂直居中
+
+*/
+.m-groups(@hgap, @vgap: @hgap){
+  .group, .groups, .groups-block{
+    display: block;
+  }
+  .inline-group, .inline-groups, .inline-groups-block{
+    display: inline-block;
+  }
+  .group{
+    display: block;
+    margin-bottom: @vgap;
+    &:last-child{
+      margin-bottom: 0;
+    }
+  }
+  .groups-block, .inline-groups-block{
+    >*{
+      .group;
+    }
+  }
+  .inline-group{
+    display: inline-block;
+    margin-right: @hgap;
+    &:last-child{
+      margin-right: 0;
+    }
+  }
+  .groups, .inline-groups{
+    >*{
+      .inline-group;
+    }
+  }
+  .flex-groups{
+    display: flex;
+  }
+  .inline-flex-groups{
+    display: inline-flex;
+  }
+  .flex-groups, .inline-flex-groups{
+    margin-bottom: 0 - @vgap;
+    margin-right: 0 - @hgap;
+    align-items: center;
+    >*{
+      margin-bottom: @vgap;
+      margin-right: @hgap;
+    }
+    &.pull-left, .pull-left{
+      justify-content: flex-start;
+    }
+    &.pull-right, .pull-right{
+      justify-content: flex-end;
+    }
+  }
+}
+
+/* 指定一个额外的class，重新定义group系列的间距大小 */
+.m-groups-gap(@name, @hgap, @vgap: @hgap){
+  .@{name}{
+    &.group{
+      margin-bottom: @vgap;
+      &:last-child{
+        margin-bottom: 0;
+      }
+    }
+    &.groups-block, &.inline-groups-block{
+      >*{
+        margin-bottom: @vgap;
+        &:last-child{
+          margin-bottom: 0;
+        }
+      }
+    }
+    &.inline-group{
+      margin-right: @hgap;
+      &:last-child{
+        margin-right: 0;
+      }
+    }
+    &.groups, &.inline-groups{
+      >*{
+        margin-right: @hgap;
+        &:last-child{
+          margin-right: 0;
+        }
+      }
+    }
+  }
+}
+
+/** 栅格系统 */
+// 默认12份，递增单位是1份
+.grid(@nums: 12, @interval: 1, @now: @interval)when(@nums >= @now){
+  .grid-gen(@nums: 12, @interval: 1, @now: @interval)when(@nums >= @now){
+    .col-@{now}{
+      float: left;
+      width: @now / @nums * 100%;
+    }
+    .grid-gen(@nums, @interval, @now + @interval)
+  }
+  .grid-@{nums}{
+    .grid-gen(@nums, @interval, @now);
+  }
+}

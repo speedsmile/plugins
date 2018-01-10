@@ -1,0 +1,30 @@
+.tip-welcome{
+  position: absolute;
+  top: 50%;
+  width: 100%;
+  font-size: 32REM;
+  text-align: center;
+  color: #636161;
+  transform: translateY(-50%);
+}
+.tip{
+  //position: absolute;
+  //left: 0;
+  padding-left: 130REM;
+  width: 100%;
+  height: @block-height;
+  line-height: @block-height;
+  font-size: 30REM;
+  color: #666;
+  background-color: #eaeaea;
+  &.nodata{
+    background-color: #ffdfe0;
+  }
+  .icon-warning{
+    position: absolute;
+    left: 45REM;
+    font-size: 50REM;
+    line-height: inherit;
+    color: #f76160;
+  }
+}
