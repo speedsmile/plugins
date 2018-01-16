@@ -4,7 +4,6 @@ var config = require('../config')
 var merge = require('webpack-merge')
 var baseWebpackConfig = require('./webpack.base.conf')
 var FriendlyErrorsPlugin = require('friendly-errors-webpack-plugin')
-var entry = require('../modules/entry')
 
 // add hot-reload related code to entry chunks
 Object.keys(baseWebpackConfig.entry).forEach(function (name) {

@@ -89,8 +89,9 @@ function htmlTemplate(module, o){
     htmlTemplate = htmlTemplates[config.template] || config.template;
   }
   // filename 模板输出路径，默认和模块的路径一致
-  let filename = convertSep(path.join(config.output || "", (config.filename || module) + (config.ext)));
-
+  let filename = config.filename || module;
+  // 如果设置了文件后缀，不再重复拼接后缀名称
+  filename = convertSep(path.join(config.output || "", filename + (filename.endsWith(config.ext) ? "" : config.ext)));
   return Object.assign(defaults, config, {chunks, template: htmlTemplate, filename})
 }
 // 把所有盘符分割符号统一成"/"

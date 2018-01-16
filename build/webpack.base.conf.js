@@ -4,27 +4,19 @@ var webpack = require('webpack')
 var ExtractTextWebpackPlugin = require('extract-text-webpack-plugin')
 var config = require('../config')
 var vueLoaderConfig = require('./vue-loader.conf')
-var entry = require('../src/modules/entry')
+var entry = require('../src/plugin/entry')("src/test/*.js", {base: "src/test", template: {
+  template: resolve("src/test/selection.html"),
+  filename: resolve('dist/selection'),
+  chunks: ["."]
+}});
 var HtmlWebpackPlugin = require('html-webpack-plugin')
-var htmlConfig = {
-  minify: {
-    removeComments: true, // 清除html中注释的部分
-    // collapseWhitespace: true, // 清除空格，压缩html
-    // collapseBooleanAttributes: true, // 省略布尔属性的值，比如：<input checked="checked"/>,那么设置这个属性后，就会变成 <input checked/>;
-    // removeEmptyAttributes: true, // 清除所有的空属性（自定义属性不会被清除）
-    // removeScriptTypeAttributes: true, // 清除所有script标签中的type="text/javascript"属性
-    // removeStyleLinkTypeAttributes: true, // 清除所有Link标签上的type属性
-    // minifyJS: true, // 压缩html中的javascript代码
-    // minifyCSS: true // 压缩html中的css代码
-  }
-}
 
-function resolve (dir) {
+function resolve(dir) {
   return path.join(__dirname, '..', dir)
 }
 
 module.exports = {
-    entry: entry("src/test", {base: "src/test"}),
+  entry: entry.js,
   output: {
     path: config.build.assetsRoot,
     filename: '[name].js',
@@ -100,15 +92,16 @@ module.exports = {
   },
   plugins: [
     // https://github.com/ampedandwired/html-webpack-plugin
-      new HtmlWebpackPlugin({
-          filename: resolve('dist/selection.html'),
-          template: 'src/test/selection.html',
-          chunks: ["selection"],
-          inject: true,
-          minify: htmlConfig.minify,
-          // necessary to consistently work with multiple chunks via CommonsChunkPlugin
-          chunksSortMode: 'dependency'
-      }),
+    ...entry.html.map(html => (console.log(JSON.stringify(html)),new HtmlWebpackPlugin(html))),
+    // new HtmlWebpackPlugin({
+    //   filename: resolve('dist/selection.html'),
+    //   template: 'src/test/selection.html',
+    //   chunks: ["selection"],
+    //   inject: true,
+    //   minify: htmlConfig.minify,
+    //   // necessary to consistently work with multiple chunks via CommonsChunkPlugin
+    //   chunksSortMode: 'dependency'
+    // }),
     // new ExtractTextWebpackPlugin({
     //   filename: '[name].css'
     // }),
