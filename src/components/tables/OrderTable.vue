@@ -1,5 +1,5 @@
 <template>
-  <div is="table" class="sale-table">
+  <div is="table" class="order-table">
     <slot name="caption"></slot>
     <div is="tbody">
       <slot name="th"></slot>
@@ -30,7 +30,7 @@
   }
 </script>
 <style lang="less">
-  .sale-table {
+  .order-table {
     @font-size: 36REM;
     @padding-lr: 25REM;
     @cell-height: 52REM;
