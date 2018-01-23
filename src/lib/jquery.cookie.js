@@ -1,4 +1,4 @@
-export default function ($) {
+module.exports = function ($) {
   var pluses = /\+/g;
 
   function encode(s) {
