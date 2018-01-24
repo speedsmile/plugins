@@ -1,0 +1,9 @@
+{
+  "name": "adv-responsive",
+  "version": "0.0.1",
+  "description": "页面响应式开发相关工具",
+  "author": "weikaiwei",
+  "dependencies": {
+    "postcss": "^6.0.14"
+  }
+}
