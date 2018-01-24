@@ -3,7 +3,7 @@
  * 依赖axios的api
  * 必要参数：1、ajax对象；2、setData方法
  */
-function ObjectModel(o) {
+export default function ObjectModel(o) {
   this.initData(o);
 }
 ObjectModel.prototype = {
@@ -92,4 +92,3 @@ ObjectModel.prototype = {
     this.data = dataType[this.type] || [];
   }
 };
-export default ObjectModel;

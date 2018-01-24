@@ -1,0 +1,9 @@
+{
+  "name": "webpack-entry",
+  "version": "0.0.1",
+  "description": "wepack的工具模块，适用于多入口页面，提取入口entry配置和入口页面的模板",
+  "author": "weikaiwei",
+  "dependencies": {
+    "glob": "^7.1.2"
+  }
+}

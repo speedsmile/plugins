@@ -3,11 +3,11 @@
  * 依赖axios的api
  * 必要参数：1、ajax对象；2、setData方法
  */
-function ListData(o) {
+export default function listModel(o) {
   this.initData = o;
   this.clearData();
 }
-ListData.prototype = {
+listModel.prototype = {
   /**向服务器端发送请求，需要根据实际情况进行重写
    * 默认情况下使用this.ajax属性发送一个get请求，
    * */
@@ -123,4 +123,3 @@ ListData.prototype = {
     this.data = dataType[this.type] || [];
   }
 };
-export default ListData;
