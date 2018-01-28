@@ -42,20 +42,17 @@
       width: 100%;
     }
     &.h {
-      .list {
-        li {
-          display: inline-block;
-          padding: 8px;
-          &:hover{
-            background-color: transparent;
-            .link{
-                color: @blue-basic;
-                text-decoration: underline;
-            }
+      .list-item {
+        display: inline-block;
+        padding: 8px;
+        &:hover{
+          background-color: transparent;
+          .link{
+            color: @blue-basic;
+            text-decoration: underline;
           }
         }
       }
-
       .link {
         //cursor: pointer;
         //&:hover{
@@ -236,10 +233,8 @@
         background-color: transparent;
       }
     }
-    .selected {
-      a {
-        color: @blue-basic;
-      }
+    .list-item.selected {
+      color: @blue-basic;
     }
     .search-group {
       position: relative;
@@ -291,14 +286,12 @@
         }
       }
     }
-    .list {
-      li {
-        .ellipsis;
-        padding: 8px 16px;
-        cursor: pointer;
-        &:hover {
-          background-color: @bg-hover;
-        }
+    .list-item {
+      .ellipsis;
+      padding: 8px 16px;
+      cursor: pointer;
+      &:hover {
+        background-color: @bg-hover;
       }
     }
   }

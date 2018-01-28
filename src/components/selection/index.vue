@@ -12,14 +12,18 @@
       </ul>
       <div class="placeholder" v-else v-text="placeholder"></div>
       <i class="icon-clear" @click.stop="removeAll"
-         v-if="clearable!==false&&selectedItems&&selectedItems.length">
+         v-if="clearable && selectedItems && selectedItems.length">
         <i class="icon">&times;</i>
       </i>
       <i class="icon-drop"></i>
     </div>
+    <!-- 下拉选项的渲染器render -->
+    <slot name="render">
+    </slot>
+    <!--  -->
     <!-- 下拉区域 -->
     <focus-panel ref="list" class="drop-list">
-      <slot>
+      <slot name="drop">
         <!-- 搜素区域 -->
         <div class="search-group" v-show="filterable">
           <!-- 搜索框 -->
@@ -31,32 +35,70 @@
           <!--<focus-panel ref="resultList" class="drop-list full-width">-->
           <!--<ul class="search-result list-group">-->
           <!--<li v-for="item in searchResult" :class="{selected: isSelected(item)}" @click="itemClick(item)">-->
-          <!--<a class="link" href="javascript:;">{{item[labelField]}}</a>-->
+          <!--<a class="link" href="javascript:">{{item[labelField]}}</a>-->
           <!--</li>-->
           <!--</ul>-->
           <!--</focus-panel>-->
         </div>
         <!-- 下拉列表区域 -->
-        <ul class="list">
-          <li v-for="item in listItems" :class="{selected: isSelected(item)}" @click="itemClick(item)"
-              :title="item[labelField]">
-            <a class="link" href="javascript:;">{{item[labelField]}}</a>
-          </li>
-        </ul>
+        <div class="list">
+          <!-- 下拉区域，不使用数据绑定自动生成，直接拼写html结构的方式。适用于初始化阶段，会把这个slot中的html内容自动转换成数据对象的格式，然后初始化下拉 -->
+          <slot>
+            <!--<div class="list-item"-->
+            <!--v-for="item in listItems"-->
+            <!--:class="{selected: isSelected(item)}" :title="item[labelField]"-->
+            <!--@click="itemClick(item)"-->
+            <!--&gt;-->
+            <!--{{value[labelField]}}-->
+            <!--</div>-->
+            <option-item v-for="item,i in listItems" :key="i" :item="item" :label-field="labelField"
+                         :value-field="valueField" :title="item[labelField]">
+            </option-item>
+          </slot>
+        </div>
       </slot>
     </focus-panel>
   </div>
 </template>
 <script>
+  // TODO 增加配置参数，value项是要强等于还是弱等于。目前是强等于
   import "./selection.less";
   import focusPanel from "./focusPanel.vue";
+  import Option from "./option.vue";
 
   // 配合iview的Form组件的校验框架，需要引入该ForIView模块。不使用iview则不需要引用此模块
   import ForIView from './ForIView/ForIView';
+
+  /**把虚拟的dom节点VNode解析成正常的dom结构
+   * @param vnode Array 虚拟的dom节点
+   *   vnode的重要结构
+   {
+     tag: dom标签。undefined表示当前是文本节点
+     text: 文本
+     data: {
+       attrs: { 绑定的所有属性值 },
+       on: { 绑定的所有事件 }
+       slot: slot的名称
+     },
+     children: [ 子节点vnode ]
+   }
+   * */
+  function parseVNode(vnode, parent) {
+    let nodeList = [];
+    if (vnode) {
+      for (let v of vnode) {
+        let node = v.tag ? document.createElement(v.tag) : document.createTextNode(v.text || "");
+        nodeList.push(node);
+        parseVNode(v.childNodes, node); // childNodes包含文本节点，children只包含元素节点
+        parent && parent.appendChild(node)
+      }
+    }
+    return nodeList
+  }
   export default {
     name: "selection",
     mixins: [ForIView],
-    components: {focusPanel},
+    components: {focusPanel, "OptionItem": Option},
     model: {
       prop: 'vModel',
       event: 'on-model-change'
@@ -64,6 +106,7 @@
     data () {
       return {
         status: "collapse",//当前状态：expand、collapse（默认）
+        slotItems: null,
         items_: [],
         selectedItems_: [],
         searchKeywords_: "",
@@ -101,9 +144,15 @@
       model: {default: "value"},
       clearModel: {default: null},
       // 是否多选
-      multiple: {default: false},
+      multiple: {
+        type: Boolean,
+        default: false
+      },
       // 是否显示清除
-      clearable: {default: false},
+      clearable: {
+        type: Boolean,
+        default: false
+      },
       /**对下拉数据筛选
        * 假值：关闭搜索功能；
        * 真值（默认）：本地搜索，只对下拉中的数据新进筛选；
@@ -125,6 +174,7 @@
         set: function (v) {
           let {eq, newData} = this._eq(v, this.items_);
           this.items_ = newData;
+          this.slotItems = null;
           if (!eq) {
             // 设置默认选项
             if (this.items_ && (!this.selectedItems || !this.selectedItems.length) && this.defaultIndex !== null) {
@@ -149,6 +199,7 @@
             // 默认选项设置完成后同步更改绑定的数据源
             this._updateModels();
           }
+          this.setChildrenState(this.selectedItems_, true)
         }
       },
       // 输入关键字进行搜索
@@ -157,9 +208,9 @@
           return this.searchKeywords_;
         },
         set: (function () {
-          var timeoutId;
+          let timeoutId;
           return function (v) {
-            var vue = this;
+            let vue = this;
 
             function search(v) {
               v = $.trim(v);
@@ -197,8 +248,8 @@
       listItems: function () {
         return this.searchKeywords ? this.searchResult : this.items
       },
-      clearModel_: function(){
-          return this.clearModel === "" ? "destroyed" : this.clearModel;
+      clearModel_: function () {
+        return this.clearModel === "" ? "destroyed" : this.clearModel;
       }
     },
     watch: {
@@ -221,30 +272,41 @@
         if (this.multiple) {
           selectedValue = [];
           //不能重复添加同一个选中项
-          selections.every(i=>item[valueField] != i[valueField]
+          selections.every(i => item[valueField] !== i[valueField]
           ) && (selections.push(item), selectedValue.push(item[valueField]));
           this._updateModels();
         } else {
           this.selectedItems = [item];
           selectedValue = item[valueField]
         }
+        this.setChildrenState(this.selectedItems, true);
         this.$emit("on-change", selectedValue, this)
       },
       //移除选中项
       removeSelection (item) {
         let selections = this.selectedItems, valueField = this.valueField;
         selections.some(function (i, index) {
-          if (item[valueField] == i[valueField]) {
+          if (item[valueField] === i[valueField]) {
             selections.splice(index, 1);
             return true;
           }
         });
+        this.setChildrenState([item], false);
         this.$emit("on-change", this._updateModels().values, this);
       },
       // 移除全部选项
       removeAll(){
         this.selectedItems = null;
-        this.$emit("on-change", null, this)
+        this.$refs.list.$children.forEach(child => {
+          child.selected = false
+        });
+        this.$emit("on-change", null, this);
+      },
+      /**根据数据项找到对应的子节点
+       * @param items 子节点的数据
+       * */
+      setChildrenState(items, selected){
+        this.$refs.list && this.$refs.list.$children && this.$refs.list.$children.forEach(child => items.forEach(item => child.match(item, {selected})));
       },
       //展开下拉，定位搜索框
       // Todo 展开下拉，选中项的对应数据要显示在看得见的地方
@@ -283,7 +345,7 @@
       isSelected (item) {
         let valueField = this.valueField;
         return this.selectedItems && this.selectedItems.some(function (selectionItem) {
-            return selectionItem[valueField] == item[valueField];
+            return selectionItem[valueField] === item[valueField];
           });
       },
       // 本地数据过滤的默认方法
@@ -300,7 +362,7 @@
        * */
       _updateModels(){
         // 根据mapField的规则，是否需要把选中
-        var selections = this.selectedItems, labelField = this.labelField, valueField = this.valueField,
+        let selections = this.selectedItems, labelField = this.labelField, valueField = this.valueField,
           labels, values, model, modelType;
         let v = selections && (this.multiple ? (selections.length ? selections : null) : selections[0]);
         if (v) {
@@ -352,7 +414,7 @@
         /**设置初始选中的下拉选项
          * 如果设置了mapField字段，优先vModel
          * */
-        if(this.status == "beforeDestroy" || this.status == "destroyed")return
+        if (this.status == "beforeDestroy" || this.status == "destroyed")return;
         let items, labelMap = this._parseContext(this.labelModel), valueMap = this._parseContext(this.valueModel),
           modelType = this.model,
           values = [], labels = [],
@@ -395,7 +457,7 @@
         let modelType = this.model;
         // 1. model替代value
         if (modelType == "value") {
-            let labelMap = this._parseContext(this.labelModel);
+          let labelMap = this._parseContext(this.labelModel);
           labelMap && (labelMap.context[labelMap.field] = null);
         }
         // 2. model替代label
@@ -429,9 +491,10 @@
       _watchMap(){
         let labelMap = this.labelModel, valueMap = this.valueModel;
         // 是否有重复的监听
-        function find(context, field){
-            return context._watchers.some(watcher => watcher.expression === field)
+        function find(context, field) {
+          return context._watchers.some(watcher => watcher.expression === field)
         }
+
         // vModel是可响应的，
         // 监听label的变化
         if (labelMap && !find(this.context, labelMap)) {
@@ -447,7 +510,7 @@
         }
       },
       _convert (v, k, l) {
-        var valueField = this.valueField, labelField = this.labelField, obj, arr = [];
+        let valueField = this.valueField, labelField = this.labelField, obj, arr = [];
         k || (k = valueField);
         l || (l = labelField);
         //设置数据的时候要经过格式转换。兼容json、数组、对象
@@ -481,7 +544,7 @@
             obj[labelField] = v[labelField];
             arr.push(obj);
           } else {
-            for (var i in v) {
+            for (let i in v) {
               obj = {};
               obj[valueField] = i;
               obj[labelField] = v[i];
@@ -532,36 +595,50 @@
        * 如果没有下拉数据，等下拉数据变化后再执行上面的检测
        * */
       _findItem(value, label){
-        var items = this.items, valueField = this.valueField, labelField = this.labelField;
+        let items = this.items, valueField = this.valueField, labelField = this.labelField;
         if (!value) {
           return null
         }
         if (!this._isNull(value)) {
-          items.find(n => (n[valueField] == value) && (label = n[labelField], true));
+          items.find(n => (n[valueField] === value) && (label = n[labelField], true));
         }
         return {[valueField]: value, [labelField]: label}
       }
     },
     created () {
-      // 组件初始化，prop和v-model绑定的数据在set访问器创建之前已经注入进来。一些需要转换格式的数据需手动调用数据转换方法
+      // 组件初始化，prop和v-model绑定的数据在set访问器创建之前已经注入进来，无法执行set访问器中的
+      // 初始化下拉的各种变量的数据结构
       this._setSelectedItems();
+      /**下拉数据设置
+       * 如果设置了下拉数据的slot，第一次初始化使用slot中的html结构
+       * */
       this.items = this.value;
+      // 绑定value和label的对象监测
       this._watchMap();
     },
     mounted () {
-      var vue = this, $refs = this.$refs, list = $refs.list;
+      let vue = this, $refs = this.$refs, list = $refs.list;
       list.addFocusEvent(this.$el);
-      list.$on("on-expand", function () {vue.expand()});
-      list.$on("on-collapse", function () {vue.collapse()});
+      list.$on("on-expand", function () {
+        vue.expand()
+      });
+      list.$on("on-collapse", function () {
+        vue.collapse()
+      });
+      this.$on("on-item-click", function (...args) {
+        this.itemClick(...args)
+      });
     },
     beforeDestroy(){
       this.status = "beforeDestroy";
       this.$emit("on-before-destroy", this);
     },
+    /**销毁下拉组件，重新生成一个新的
+     * */
     destroyed(){
-        this.status = "destroyed";
-      if(this.clearModel_ == "destroyed"){
-          this._clearModel();
+      this.status = "destroyed";
+      if (this.clearModel_ == "destroyed") {
+        this._clearModel();
       }
       this.$emit("on-destroyed", this);
     }
