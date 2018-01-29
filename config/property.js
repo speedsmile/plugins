@@ -6,7 +6,7 @@ module.exports = {
   // 运行环境
   NODE_ENV: process.env.NODE_ENV || "dev",
   // 端口
-  PORT: process.env.PORT || '3007',
+  PORT: process.env.PORT || '2999',
 
   // 服务器项目
   server: "http://10.112.167.18/fe/anxun.git",

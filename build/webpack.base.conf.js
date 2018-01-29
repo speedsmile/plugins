@@ -12,7 +12,7 @@ function resolve(dir) {
   return path.join(__dirname, '..', dir)
 }
 console.log(utils.assetsPath('img/[name].[hash:7].[ext]'))
-var entry = Entry("test/selection/selection.js", {base: "test/selection", template: {output: resolve("dist/") + require("../package.json").name, template: resolve("test/selection/selection.html")}});
+var entry = Entry("test/*/*.js", {base: "test", template: {output: resolve("dist/") + require("../package.json").name}});
 module.exports = {
   entry: entry.js,
   output: {
