@@ -9,7 +9,7 @@
       templates Object html模板
         {
           "入口模块" : {
-            template: html模板的。
+            template: html模板。
               默认：pc.html；
               m：m.html——移动端
             ext: ".html",
