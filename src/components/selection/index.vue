@@ -51,9 +51,9 @@
             <!--&gt;-->
             <!--{{value[labelField]}}-->
             <!--</div>-->
-            <option-item v-for="item,i in listItems" :key="i" :item="item" :label-field="labelField"
+            <selection-option v-for="item,i in listItems" :key="i" :item="item" :label-field="labelField"
                          :value-field="valueField" :title="item[labelField]">
-            </option-item>
+            </selection-option>
           </slot>
         </div>
       </slot>
@@ -64,7 +64,7 @@
   // TODO 增加配置参数，value项是要强等于还是弱等于。目前是强等于
   import "./selection.less";
   import focusPanel from "./focusPanel.vue";
-  import Option from "./option.vue";
+  import SelectionOption from "./option.vue";
 
   // 配合iview的Form组件的校验框架，需要引入该ForIView模块。不使用iview则不需要引用此模块
   import ForIView from './ForIView/ForIView';
@@ -98,7 +98,7 @@
   export default {
     name: "selection",
     mixins: [ForIView],
-    components: {focusPanel, "OptionItem": Option},
+    components: {focusPanel, "SelectionOption": SelectionOption},
     model: {
       prop: 'vModel',
       event: 'on-model-change'

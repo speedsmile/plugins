@@ -7,7 +7,7 @@
   // TODO 增加配置参数，value项是要强等于还是弱等于。目前是强等于
   import Emitter from './emitter';
   export default {
-    name: "option-item",
+    name: "selection-option",
     props: {
       // item拆解成value和label，优先级：value -> label -> item
       value: {}, // 对应v
