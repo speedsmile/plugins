@@ -1,19 +1,21 @@
+@bg: #348fe2;
+ul{
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
 .tree-menu{
   @sub-indent: 20px;
+  @text-color: #a8acb1;
   font-size: 14px;
-  &.tree-list-root{
-    >.tree-node{
-      padding-left: 0;
-    }
-  }
   .tree-node{
-    color: #a8acb1;
+    color: @text-color;
   }
   .tree-item{
     padding: 14px 10px;
     cursor: pointer;
     &:hover{
-      .m-selected;
+      .m-opened;
     }
     .icon {
       margin-right:8px;
@@ -22,43 +24,52 @@
   .leaf-node{
     &:hover, &.select-node{
       >.tree-item{
-        .m-leaf-selected;
+        .m-selected;
       }
     }
   }
   .open-node{
     >.tree-item{
-      .m-selected;
+      .m-opened;
       .node-arrow{
         transform: rotate(180deg);
       }
     }
   }
-  .m-indent;
   // 节点展开收起的箭头
   .node-arrow{
     position: relative;
     top: 4px;
     float: right;
+    width: 0;
+    height: 0;
+    border-style: solid;
+    border-color: @text-color transparent transparent;
+    border-width: 6px 5px 0;
+    transition: border-color .2s ease-in-out;
   }
-  .m-border-line;
   // 动画过渡
   .node-text, .icon, .node-arrow{
     transition: all .2s ease-in-out;
   }
+  .m-indent;
+  .m-border-line;
   /*********** mixin start *****************/
-  // 普通节点选中的样式
+  // 节点选中的样式
   .m-selected(){
     color: #fff;
-    background-color: #348fe2;
+    background-color: transparent;
+    .icon{
+      color: @bg;
+    }
   }
-  // 叶节点选中的样式
-  .m-leaf-selected(){
+  // 节点展开的样式
+  .m-opened(){
     color: #fff;
-    background-color: #348fe2;
-    //.icon{
-    //  color: #348fe2;
-    //}
+    background-color: @bg;
+    .node-arrow{
+      border-top-color: #fff;
+    }
   }
 
   // 树菜单的分割线
@@ -85,6 +96,8 @@
       .m-indent(@l+1)
     }
   }
-  // 必须存在，否则当@l==@n时会发生匹配不上的异常
-  .m-indent(@l)when(@l = @n){}
+  // 树节点展开/关闭高度变化的动画
+  .collapse-transition{
+    transition: height .2s ease-in-out;
+  }
 }
