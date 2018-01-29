@@ -37,8 +37,9 @@
         }
  *
  * */
+let path = require("path");
 function Entry (entry, config) {
-  let path = require("path"), fs = require("fs"), jsModule = {}, htmlModule = [],
+  let fs = require("fs"), jsModule = {}, htmlModule = [],
     {ext = ".js", base = "", templates = {}, template = {}} = config || {};
   base = convertSep(base);
   require("glob").sync(entry).forEach(function (relpath) {
@@ -46,7 +47,8 @@ function Entry (entry, config) {
     if (info.isFile() && path.extname(relpath) == ext) {
       let refname = convertSep(relpath).replace(/\.[^.]*$/, ""), // 去掉模块的后缀名
         // 编译后的模块路径。去掉基于base的那部分
-        key = base ? refname.replace(new RegExp("^(.*?/)?" + join(base, "?")), "") : key;
+        key = base ? refname.replace(new RegExp("^(.*?/)?" + join(base, "?")), "") : refname;
+
       jsModule[key] = "./" + refname;
       // 对应的html模板
       htmlModule.push(htmlTemplate(key, Object.assign({}, template, templates[key])))
@@ -59,7 +61,7 @@ function Entry (entry, config) {
  * @param o 模板配置
  * */
 function htmlTemplate(module, o){
-  let path = require("path"), defaults = {
+  let defaults = {
     ext: ".html",
     title: "",
     inject: true,
@@ -81,7 +83,7 @@ function htmlTemplate(module, o){
   };
   let chunks = config.chunks ? ((config.chunks instanceof Array) ? config.chunks : [config.chunks]) : ["manifest", "vendor", module];
   // chunks中的"."会被替换成当前模块，如果存在chunksPath，自动加上作为chunks的父级路径
-  chunks = chunks.map(chunk => path.join(config.chunksPath || "", chunk === "." ? module : chunk));
+  chunks = chunks.map(chunk => path.posix.join(config.chunksPath || "", chunk === "." ? module : chunk));
   // template 引用的模板路径
   let htmlTemplate = path.resolve(__dirname, "template/pc.html");
   // 设置了模板路径，如果没有对应的别名模板，就使用传入的模板名称
@@ -92,7 +94,7 @@ function htmlTemplate(module, o){
   let filename = config.filename || module;
   // 如果设置了文件后缀，不再重复拼接后缀名称
   filename = convertSep(path.join(config.output || "", filename + (filename.endsWith(config.ext) ? "" : config.ext)));
-  return Object.assign(defaults, config, {chunks, template: htmlTemplate, filename})
+  return Object.assign(defaults, config, {chunks, template: convertSep(htmlTemplate), filename})
 }
 // 把所有盘符分割符号统一成"/"
 function convertSep(s){
