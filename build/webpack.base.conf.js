@@ -1,20 +1,18 @@
 var path = require('path')
 var utils = require('./utils')
 var webpack = require('webpack')
-var ExtractTextWebpackPlugin = require('extract-text-webpack-plugin')
 var config = require('../config')
 var vueLoaderConfig = require('./vue-loader.conf')
-var entry = require('../src/plugin/entry')("src/test/*.js", {base: "src/test", template: {
-  template: resolve("src/test/selection.html"),
-  filename: resolve('dist/selection'),
-  chunks: ["."]
-}});
+let property = require("../config/property")
+var Entry = require('../src/plugin/entry');
 var HtmlWebpackPlugin = require('html-webpack-plugin')
+const ExtractTextPlugin = require('extract-text-webpack-plugin');
 
 function resolve(dir) {
   return path.join(__dirname, '..', dir)
 }
-
+console.log(utils.assetsPath('img/[name].[hash:7].[ext]'))
+var entry = Entry("test/selection/selection.js", {base: "test/selection", template: {output: resolve("dist/") + require("../package.json").name, template: resolve("test/selection/selection.html")}});
 module.exports = {
   entry: entry.js,
   output: {
@@ -25,25 +23,14 @@ module.exports = {
       : config.dev.assetsPublicPath
   },
   resolve: {
-    extensions: ['.js', '.vue', '.json', '.less'],
+    extensions: ['.js', ".vue", ".less", ".css"],
     alias: {
       'vue$': 'vue/dist/vue.esm.js',
-      '@': resolve('src'),
-      '@components': resolve('src/components'),
+      '@': resolve('src')
     }
   },
   module: {
     rules: [
-      // {
-      //   test: require.resolve('jquery'),
-      //   use: [{
-      //     loader: 'expose-loader',
-      //     options: 'jQuery'
-      //   },{
-      //     loader: 'expose-loader',
-      //     options: '$'
-      //   }]
-      // },
       {
         test: /\.vue$/,
         use: [
@@ -62,7 +49,7 @@ module.exports = {
       {
         test: /\.js$/,
         loader: 'babel-loader',
-        include: [resolve('src'), resolve('test')]
+        include: [resolve('src'), resolve('test'), resolve('node_modules/iview/src')]
       },
       {
         test: /\.(png|jpe?g|gif|svg)(\?.*)?$/,
@@ -91,26 +78,12 @@ module.exports = {
     ]
   },
   plugins: [
-    // https://github.com/ampedandwired/html-webpack-plugin
-    ...entry.html.map(html => (console.log(JSON.stringify(html)),new HtmlWebpackPlugin(html))),
-    // new HtmlWebpackPlugin({
-    //   filename: resolve('dist/selection.html'),
-    //   template: 'src/test/selection.html',
-    //   chunks: ["selection"],
-    //   inject: true,
-    //   minify: htmlConfig.minify,
-    //   // necessary to consistently work with multiple chunks via CommonsChunkPlugin
-    //   chunksSortMode: 'dependency'
-    // }),
-    // new ExtractTextWebpackPlugin({
-    //   filename: '[name].css'
-    // }),
-    new webpack.ProvidePlugin({
-      $: "jquery",
-      jQuery: "jquery"
-    })
+    ...entry.html.map(html => new HtmlWebpackPlugin(html))
+    // new webpack.ProvidePlugin({
+    //   $: "jquery",
+    //   jQuery: "jquery"
+    // })
   ],
   externals: {
-    // "Vue": "window.Vue",
   }
 }

@@ -10,7 +10,7 @@ var path = require('path')
 var express = require('express')
 var webpack = require('webpack')
 var proxyMiddleware = require('http-proxy-middleware')
-var webpackConfig = require('./webpack.test.conf')
+var webpackConfig = require('./webpack.dev.conf')
 
 // default port where dev server listens for incoming traffic
 var port = process.env.PORT || config.dev.port
@@ -39,7 +39,6 @@ compiler.plugin('compilation', function (compilation) {
     cb()
   })
 })
-
 // proxy api requests
 Object.keys(proxyTable).forEach(function (context) {
   var options = proxyTable[context]
@@ -48,7 +47,8 @@ Object.keys(proxyTable).forEach(function (context) {
   }
   app.use(proxyMiddleware(options.filter || context, options))
 })
-
+// let property = require("../config/property");
+// require(property.serverPath + "/routes")(app);
 // handle fallback for HTML5 history API
 app.use(require('connect-history-api-fallback')())
 
@@ -63,6 +63,7 @@ app.use(hotMiddleware)
 var staticPath = path.posix.join(config.dev.assetsPublicPath, config.dev.assetsSubDirectory)
 app.use(staticPath, express.static('./static'))
 
+
 var uri = 'http://localhost:' + port
 
 var _resolve
@@ -75,7 +76,7 @@ devMiddleware.waitUntilValid(() => {
   console.log('> Listening at ' + uri + '\n')
   // when env is testing, don't need open it
   if (autoOpenBrowser && process.env.NODE_ENV !== 'testing') {
-    opn(uri + `/${pName}/login.html`, {app: ["chrome"]})
+    opn(uri + `/${pName}/selection.html`, {app: ["chrome"]})
   }
   _resolve()
 })
