@@ -5,7 +5,7 @@ const HtmlWebpackPlugin = require('html-webpack-plugin');
 
 module.exports = {
     entry: {
-        "personas/crowdLib": "./src/personas/crowdLib",
+        "selection/selection": "./pack/selection",
     },
     output: {
         path: path.resolve('./dist'),
@@ -36,14 +36,14 @@ module.exports = {
             {
                 test: /\.css$/,
                 use: ExtractTextPlugin.extract({
-                    use: ['css-loader?minimize', 'autoprefixer-loader'],
+                    use: ['css-loader?minimize', 'postcss-loader'],
                     fallback: 'style-loader'
                 })
             },
             {
                 test: /\.less/,
                 use: ExtractTextPlugin.extract({
-                    use: ['css-loader?minimize', 'autoprefixer-loader', 'less-loader'],
+                    use: ['css-loader?minimize', 'postcss-loader', 'less-loader'],
                     fallback: 'style-loader'
                 })
             },
@@ -85,9 +85,10 @@ module.exports = {
         })
     ],
     resolve: {
-        extensions: ['.js', '.vue', '.es6', '.css', '.html'],
-        alias: {
-            'vue': 'vue/dist/vue.esm.js'
-        }
+      extensions: ['.js', ".vue", ".less", ".css"],
+      alias: {
+        'vue$': 'vue/dist/vue.esm.js',
+        '@': path.resolve('src')
+      }
     }
 };
