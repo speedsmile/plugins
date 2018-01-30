@@ -1,5 +1,8 @@
 {
   "name": "selection",
   "version": "0.0.1",
-  "main": "index.vue"
+  "main": "index.vue",
+  "dependencies": {
+    "jquery": "^2.2.4"
+  }
 }

@@ -51,8 +51,8 @@
             <!--&gt;-->
             <!--{{value[labelField]}}-->
             <!--</div>-->
-            <selection-option v-for="item,i in listItems" :key="i" :item="item" :label-field="labelField"
-                         :value-field="valueField" :title="item[labelField]">
+            <selection-option v-for="item in listItems" :key="toString(item)" :item="item" :label-field="labelField"
+                              :value-field="valueField" :title="item[labelField]">
             </selection-option>
           </slot>
         </div>
@@ -68,6 +68,7 @@
 
   // 配合iview的Form组件的校验框架，需要引入该ForIView模块。不使用iview则不需要引用此模块
   import ForIView from './ForIView/ForIView';
+  import extend from './Extend';
 
   /**把虚拟的dom节点VNode解析成正常的dom结构
    * @param vnode Array 虚拟的dom节点
@@ -213,7 +214,7 @@
             let vue = this;
 
             function search(v) {
-              v = $.trim(v);
+              v = v ? v.trim() : "";
               /**下拉搜索方法，默认本地数据搜索
                * 本地搜索：从下拉中已有的数据项中进行关键字过滤
                * 远程搜索：需提供具体的实现方法，在回调中返回搜索结果
@@ -306,7 +307,18 @@
        * @param items 子节点的数据
        * */
       setChildrenState(items, selected){
-        this.$refs.list && this.$refs.list.$children && this.$refs.list.$children.forEach(child => items.forEach(item => child.match(item, {selected})));
+        let fun = () => {
+          this.$refs.list && this.$refs.list.$children && this.$refs.list.$children.forEach(child => {
+            // 把数据匹配的下拉项设置成选中状态，把不匹配的设置成未选中
+            child.setProps({selected: items.some(item => child.match(item)) ? selected : !selected})
+          })
+        };
+//        let children = this.$refs.list && this.$refs.list.$children && this.$refs.list.$children;
+//        if (children) {
+//          children.forEach(child => items.forEach(item => child.match(item, {selected})));
+//        } else {
+          this.$nextTick(fun)
+//        }
       },
       //展开下拉，定位搜索框
       // Todo 展开下拉，选中项的对应数据要显示在看得见的地方
@@ -525,7 +537,7 @@
         if (v instanceof Array) {
           v.forEach(function (item) {
             if (typeof item == "object") {
-              obj = $.extend(true, {}, item);
+              obj = extend(true, {}, item);
               obj[valueField] = item[k];
               obj[labelField] = item[l];
               valueField != k && delete obj[k];
@@ -603,12 +615,15 @@
           items.find(n => (n[valueField] === value) && (label = n[labelField], true));
         }
         return {[valueField]: value, [labelField]: label}
+      },
+      toString(item){
+        return JSON.stringify(item)
       }
     },
     created () {
       // 组件初始化，prop和v-model绑定的数据在set访问器创建之前已经注入进来，无法执行set访问器中的
       // 初始化下拉的各种变量的数据结构
-      this._setSelectedItems();
+//      this._setSelectedItems();
       /**下拉数据设置
        * 如果设置了下拉数据的slot，第一次初始化使用slot中的html结构
        * */

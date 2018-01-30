@@ -29,22 +29,24 @@
       itemClick(){
         this.dispatch('selection', 'on-item-click', [this.itemData, this]);
       },
-      /**根据数据来匹配对应的下拉项，匹配成功则设置属性
+      /**根据数据来匹配对应的下拉项
        * @item Object 匹配的数据
-       * @props Object 匹配成功设置属性值
        * @return Boolean 匹配成功返回true
        * */
-      match(item, props){
-        if(item[this.valueField] === this.v){
-          Object.assign(this, props);
-          return true;
-        }
+      match(item){
+        return item[this.valueField] === this.v
+      },
+      /**设置属性
+       * @props Object 匹配成功设置属性值
+       * */
+      setProps(props){
+        Object.assign(this, props)
       }
     },
     created(){
       let propsData = this.$options.propsData, item = propsData.hasOwnProperty("item") ? propsData.item : {};
       this.v = propsData.hasOwnProperty("value") ? this.value : item[this.valueField];
-      this.text = propsData.hasOwnProperty("label") ? this.label : item[this.labelField] || (this.$slots.default[0] && this.$slots.default[0].text);
+      this.text = propsData.hasOwnProperty("label") ? this.label : item[this.labelField] || (this.$slots.default && this.$slots.default[0] && this.$slots.default[0].text);
       this.itemData = {[this.valueField]: this.v, [this.labelField]: this.text};
     }
   }

@@ -8,6 +8,7 @@
   </div>
 </template>
 <script>
+  import $ from "./jquery";
   export default {
     name: "focus-panel",
     data () {
@@ -52,14 +53,14 @@
         //如果焦点不在面板上任何一个元素上，把焦点设置到默认元素上
         else if (!this.hasFocusEl()) {
           $focus = this.$content.find("input:visible:first");
-          $focus.length ? $focus.focus() : $focus = this.$content.find("a[href]:visible:first");
+          $focus.length ? $focus[0].focus() : $focus = this.$content.find("a[href]:visible:first");
           this.shiftFocus($focus.length ? $focus : this.$defaultFocus);
         }
       },
       //转让焦点。默认把焦点转让给面板的隐藏焦点对象上
       shiftFocus (target) {
         //渡让焦点前强制保留焦点，渡让的过程会导致焦点先丢失
-        $(target || this.$defaultFocus).focus();
+        $(target || this.$defaultFocus)[0].focus();
       },
       //检测面板是否具有焦点，强制保留的焦点也算是具有焦点
       hasFocus () {
@@ -118,10 +119,11 @@
         var vue = this, $targets = $(targets);
         this.keepTargets = this.keepTargets.concat($targets.toArray());
         $targets.each(function () {
-          $(this).on("mouseover", function (e) {
+          this.addEventListener("mouseover", function (e) {
             //点击面板范围内的一些不可获取焦点的元素会导致导致面板焦点丢失，此时强制保留焦点
             vue.mouseTarget = e.target;
-          }).on("mouseout", function (e) {
+          });
+          this.addEventListener("mouseout", function () {
             //鼠标操作结束后返还焦点
             vue.mouseTarget = null;
             //使用shiftFocus方法，把焦点默默地设置到隐藏焦点元素上
