@@ -107,7 +107,6 @@
     data () {
       return {
         status: "collapse",//当前状态：expand、collapse（默认）
-        slotItems: null,
         items_: [],
         selectedItems_: [],
         searchKeywords_: "",
@@ -175,7 +174,6 @@
         set: function (v) {
           let {eq, newData} = this._eq(v, this.items_);
           this.items_ = newData;
-          this.slotItems = null;
           if (!eq) {
             // 设置默认选项
             if (this.items_ && (!this.selectedItems || !this.selectedItems.length) && this.defaultIndex !== null) {
@@ -621,15 +619,6 @@
       }
     },
     created () {
-      // 组件初始化，prop和v-model绑定的数据在set访问器创建之前已经注入进来，无法执行set访问器中的
-      // 初始化下拉的各种变量的数据结构
-//      this._setSelectedItems();
-      /**下拉数据设置
-       * 如果设置了下拉数据的slot，第一次初始化使用slot中的html结构
-       * */
-      this.items = this.value;
-      // 绑定value和label的对象监测
-      this._watchMap();
     },
     mounted () {
       let vue = this, $refs = this.$refs, list = $refs.list;
@@ -643,6 +632,15 @@
       this.$on("on-item-click", function (...args) {
         this.itemClick(...args)
       });
+      // 组件初始化，prop和v-model绑定的数据在set访问器创建之前已经注入进来，无法执行set访问器中的
+      // 初始化下拉的各种变量的数据结构
+//      this._setSelectedItems();
+      /**下拉的初始化数据可能来源于value值的绑定，也可能是slot传入
+       * @return 如果使用slot传入下拉项，在mounted方法中从selection-option节点中提取出数据对象；反之使用原本的value值
+       * */
+      this.items = this.$slots.default ? list.$children.map(child => child.itemData) : this.value;
+      // 绑定value和label的对象监测
+      this._watchMap();
     },
     beforeDestroy(){
       this.status = "beforeDestroy";
