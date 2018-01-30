@@ -44,13 +44,6 @@
         <div class="list">
           <!-- 下拉区域，不使用数据绑定自动生成，直接拼写html结构的方式。适用于初始化阶段，会把这个slot中的html内容自动转换成数据对象的格式，然后初始化下拉 -->
           <slot>
-            <!--<div class="list-item"-->
-            <!--v-for="item in listItems"-->
-            <!--:class="{selected: isSelected(item)}" :title="item[labelField]"-->
-            <!--@click="itemClick(item)"-->
-            <!--&gt;-->
-            <!--{{value[labelField]}}-->
-            <!--</div>-->
             <selection-option v-for="item in listItems" :key="toString(item)" :item="item" :label-field="labelField"
                               :value-field="valueField" :title="item[labelField]">
             </selection-option>
