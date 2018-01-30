@@ -15,6 +15,7 @@ jquery.more.js
 模块说明：
 core：核心模块，必须
 selector：选择器模块，必须
+css/hiddenVisibleSelectors  :visible和:hidden选择器
 
 manipulation：dom节点操作
     text、html、empty、replaceWith、replaceAll

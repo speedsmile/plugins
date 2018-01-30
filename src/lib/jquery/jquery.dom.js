@@ -11,5 +11,4 @@ define( [
     "jquery/src/manipulation"
 ], function( jQuery ) {
     return ( self.jQuery = self.$ = jQuery );
-
 } );
