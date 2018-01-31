@@ -8,7 +8,7 @@
       <div class="tree-item" v-if="isLeaf(item)" @click="trigger($event, 'click', item)">
         <div class="tree-content">
           <!-- 节点图标 -->
-          <i v-if="item[icon] != null" class="icon" :class="item[icon]"></i>
+          <i v-if="item[icon] != null" :class="item[icon]"></i>
           <span class="node-text">{{item[text]}}</span>
         </div>
       </div>
