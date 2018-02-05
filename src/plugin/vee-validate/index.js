@@ -4,7 +4,7 @@
  */
 import VeeValidate from 'vee-validate';
 import messages from './zh_CN';
-VeeValidate.Validator.updateDictionary({
+VeeValidate.Validator.localize({
     zh_CN: messages
 });
 const config = {
