@@ -1,0 +1,9 @@
+{
+  "name": "adv-axios",
+  "version": "0.0.1",
+  "description": "根据项目性质封装axios",
+  "dependencies": {
+    "es6-promise": "^4.2.4",
+    "axios": "^0.17.1"
+  }
+}
