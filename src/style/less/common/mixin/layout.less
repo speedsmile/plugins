@@ -23,7 +23,9 @@
   }
   ._fgroup_(){
     ._m-block_();
-    display: flex;
+    &, & > .flex-hgroup, &.flex-vgroup{
+      display: flex;
+    }
     &.inline, .hgroup > &{
       display: inline-flex;
       margin-bottom: 0;
@@ -55,6 +57,11 @@
     ._fgroup_();
     > *{
       ._m-inline_();
+    }
+
+    // 水平flex容器下的group系列底边距都取消
+    & > &, & > .hgroup, & > .vgroup, & > .flex-vgroup{
+      margin-bottom: 0;
     }
     align-items: center; // 元素水平对齐
     .pull-left{
@@ -96,12 +103,18 @@
 ._m-group-hgap_(@hgap){
   &.hgroup > *, &.flex-hgroup > *{
     margin-right: @hgap;
+    &:last-child{
+      margin-right: 0;
+    }
   }
 }
 // 私有mixin，设置垂直间距
 ._m-group-vgap_(@vgap){
   &.hgroup, &.vgroup, &.flex-vgroup > *{
     margin-bottom: @vgap;
+    &:last-child{
+      margin-bottom: 0;
+    }
   }
 }
 /* 指定一个额外的class，重新定义group系列的间距大小 */
