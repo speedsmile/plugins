@@ -1,6 +1,6 @@
 <template>
   <!-- 多个根节点NodeList -->
-  <ul class="tree-menu" :class="{'tree-list-root': isRoot()}">
+  <ul class="tree-menu" :class="{'tree-menu-root': isRoot()}">
     <li class="tree-node" v-for="item in menuList"
         :class="{'leaf-node': isLeaf(item), 'select-node': isSelected(item), 'open-node': getState(item, 'isOpen'), 'close-node': getState(item, 'isClose')}"
     >
@@ -36,17 +36,15 @@
   export default {
     name: 'tree-menu',
     props: {
-      value: {default: null},
-      root: {default: null}, // 根节点的数据，数组
+      value: {default: null}, // 原始节点设置的入口数据
+      root: {default: null}, // 根节点的数据，数组。从_root_属性传递下来的
       parent: {default: null},
       keyField: {default: "id"},
       text: {default: "name"},
       children: {default: "children"},
-      select: {default: "selected"},
+      select: {default: "selected"}, // 默认选中的节点属性名称
       icon: {default: "icon"},
-      open: { // 默认展开的节点属性名称
-        default: "open"
-      },
+      open: {default: "open"}, // 默认展开的节点属性名称
       multiple: {default: false, type: Boolean}, // 是否开启多选
       accordion: {default: false, type: Boolean}, // 手风琴模式。同级树节点一次只能展开一个
     },
@@ -66,6 +64,8 @@
       }
     },
     computed: {
+      /**一个tree-menu组件渲染一个nodeList集合
+       * */
       menuList: {
         get: function () {
           let value = this.value, parent = this.parent, type;
@@ -141,7 +141,7 @@
          * 从根节点开始层层遍历，取消当前节点之外的节点选中状态
          * */
         if (!this.multiple) {
-          this.everyNode(function (node, state) {
+          this.everyNode((node, state) =>{
             state.key == nodeKey || (state.isSelected = 0);
           });
         }
@@ -152,7 +152,7 @@
        * @callback Function 每次迭代处理节点的方法。返回true，停止遍历
        * */
       everyNode: function (callback) {
-        let _root_ = this._root_ || {}, data = _root_.data, map = _root_.map, state = _root_.state;
+        let _root_ = this._root_ || {}, map = _root_.map, state = _root_.state;
         for (let i in map) {
           if (callback.call(this, map[i], state[i])) {
             return;
@@ -216,9 +216,9 @@
          * */
         if (isRoot) {
           this._root_ = {
-            data: [],
-            map: {},
-            state: {}
+            data: [], // 数组格式全部节点
+            map: {}, // 对象格式全部节点
+            state: {} // 对象格式全部节点的状态
           };
         }
         rootData = this._root_.data;
