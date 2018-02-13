@@ -298,18 +298,12 @@
        * @param items 子节点的数据
        * */
       setChildrenState(items, selected){
-        let fun = () => {
+        this.$nextTick(() => {
           this.$refs.list && this.$refs.list.$children && this.$refs.list.$children.forEach(child => {
             // 把数据匹配的下拉项设置成选中状态，把不匹配的设置成未选中
             child.setProps({selected: items.some(item => child.match(item)) ? selected : !selected})
           })
-        };
-//        let children = this.$refs.list && this.$refs.list.$children && this.$refs.list.$children;
-//        if (children) {
-//          children.forEach(child => items.forEach(item => child.match(item, {selected})));
-//        } else {
-          this.$nextTick(fun)
-//        }
+        })
       },
       //展开下拉，定位搜索框
       // Todo 展开下拉，选中项的对应数据要显示在看得见的地方
@@ -444,6 +438,7 @@
         // 设置了value，label的值可能会发生改变，需要label的值同步到响应的字段
         if (!primary) {
           let labelValue = this.multiple ? labels : labels[0];
+          // 如果model映射label，触发on-model-change事件
           modelType == "value" ? this._set("label", labelValue) : this.$emit("on-model-change", labelValue, this)
         }
         this.selectedItems = items;
