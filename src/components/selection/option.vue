@@ -21,7 +21,11 @@
       // item拆解成value和label，优先级：value -> label -> item
       value: {}, // 对应v
       label: {type: String}, // 对应text
-      item: {default: null} // 对应itemData
+      item: {default: null}, // 对应itemData
+      update: { // option组件创建通知父组件更新状态
+        type: Boolean,
+        default: true
+      }
     },
     mixins: [ Emitter ],
     data(){
@@ -57,6 +61,8 @@
       this.v = propsData.hasOwnProperty("value") ? this.value : item[this.selection.valueField];
       this.text = propsData.hasOwnProperty("label") ? this.label : item[this.selection.labelField] || (this.$slots.default && this.$slots.default[0] && this.$slots.default[0].text);
       this.itemData = {[this.selection.valueField]: this.v, [this.selection.labelField]: this.text};
+      // 下拉选项发生改变，通知父组件更新数据
+      this.update && this.dispatch('selection', 'on-selection-option-update', [this.itemData, this]);
     }
   }
 </script>

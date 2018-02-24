@@ -17,11 +17,7 @@
       </i>
       <i class="icon-drop"></i>
     </div>
-    <!-- 下拉选项的渲染器render -->
-    <slot name="render">
-    </slot>
-    <!--  -->
-    <!-- 下拉区域 -->
+    <!-- 下拉面板 -->
     <focus-panel ref="list" class="drop-list">
       <slot name="drop">
         <!-- 搜素区域 -->
@@ -40,14 +36,19 @@
           <!--</ul>-->
           <!--</focus-panel>-->
         </div>
-        <!-- 下拉列表区域 -->
-        <div class="list">
-          <!-- 下拉区域，不使用数据绑定自动生成，直接拼写html结构的方式。适用于初始化阶段，会把这个slot中的html内容自动转换成数据对象的格式，然后初始化下拉 -->
+        <!-- 下拉区域，不使用数据绑定自动生成，直接拼写html结构的方式。适用于初始化阶段，会把这个slot中的html内容自动转换成数据对象的格式，然后初始化下拉 -->
+        <div class="list" v-if="!searchKeywords">
           <slot>
-            <selection-option v-for="item in listItems" :key="toString(item)" :item="item" :label-field="labelField"
-                              :value-field="valueField" :title="item[labelField]">
+            <selection-option v-for="item in items" :key="toString(item)" :item="item"
+                              :label-field="labelField" :value-field="valueField" :title="item[labelField]">
             </selection-option>
           </slot>
+        </div>
+        <!-- 搜索结果列表区域 -->
+        <div class="list filter-list" v-else>
+          <selection-option v-for="item in searchResult" :key="toString(item)" :item="item" :update="false"
+                            :label-field="labelField" :value-field="valueField" :title="item[labelField]">
+          </selection-option>
         </div>
       </slot>
     </focus-panel>
@@ -126,34 +127,28 @@
        label：label单独映射一个字段，参数：{field: "字段名称|String", context: 映射字段的上下文对象（反向修改使用）}
        value：value单独映射一个字段，参数：{field: "字段名称|String", context: 映射字段的上下文对象（反向修改使用）}
        * */
-      context: {type: Object},
-      labelModel: {type: String},
-      valueModel: {type: String},
+      context: Object,
+      labelModel: String,
+      valueModel: String,
       /**v-model指令映射字段
        "label": 映射到label字段；
        "value"默认: 映射到value字段；
        其它: {label, value},多选模式下[{label, value}]
        * */
-      model: {default: "value"},
-      clearModel: {default: null},
+      model: {type: String, default: "value"},
+      clearModel: {type: Boolean, default: false},
       // 是否多选
-      multiple: {
-        type: Boolean,
-        default: false
-      },
+      multiple: {type: Boolean, default: false},
       // 是否显示清除
-      clearable: {
-        type: Boolean,
-        default: false
-      },
+      clearable: {type: Boolean, default: false},
       /**对下拉数据筛选
        * 假值：关闭搜索功能；
        * 真值（默认）：本地搜索，只对下拉中的数据新进筛选；
        * "remote"：远程搜索
        * */
-      filterable: {default: 1},
+      filterable: {type: Boolean, default: true},
       // 搜索的方法，默认使用本地搜索的方法
-      filterMethod: {type: Function},
+      filterMethod: Function,
       filterPlaceholder: {type: String, default: "请输入关键字"},
       // 连续输入搜索字符停顿N毫秒后认为输入结束，然后开始执行搜索
       filterDelay: {type: Number, default: 300}
@@ -173,9 +168,11 @@
               this.selectedItems = this.items_[this.defaultIndex || 0];
             }
             else {
-              // 下拉内容发生变化，同步可能影响到下拉选中内容，需要同步状态
+              // 下拉内容发生变化，可能影响到下拉选中内容，需要同步状态
               this._setSelectedItems();
             }
+            // 设置下拉选项的选中状态
+            this.setChildrenSelected(this.selectedItems, true)
           }
         }
       },
@@ -191,7 +188,7 @@
             // 默认选项设置完成后同步更改绑定的数据源
             this._updateModels();
           }
-          this.setChildrenState(this.selectedItems_, true)
+          this.setChildrenSelected(this.selectedItems_, true)
         }
       },
       // 输入关键字进行搜索
@@ -234,14 +231,12 @@
         },
         set(v){
           this.searchResult_ = this._convert(v);
+          // 设置下拉选项的选中状态
+          this.setChildrenSelected(this.selectedItems, true)
         }
       },
-      // 下拉列表最终显示的数据。如果有搜索结果，优先展示搜索结果，反之展示原本的下拉
-      listItems: function () {
-        return this.searchKeywords ? this.searchResult : this.items
-      },
       clearModel_: function () {
-        return this.clearModel === "" ? "destroyed" : this.clearModel;
+        return this.clearModel ? "destroyed" : this.clearModel;
       }
     },
     watch: {
@@ -265,13 +260,13 @@
           selectedValue = [];
           //不能重复添加同一个选中项
           selections.every(i => item[valueField] !== i[valueField]
-          ) && (selections.push(item), selectedValue.push(item[valueField]));
-          this._updateModels();
+          ) && (selections.push(item));
+          selectedValue = this._updateModels().values;
+          this.setChildrenSelected(this.selectedItems, true);
         } else {
           this.selectedItems = [item];
           selectedValue = item[valueField]
         }
-        this.setChildrenState(this.selectedItems, true);
         this.$emit("on-change", selectedValue, this)
       },
       //移除选中项
@@ -283,7 +278,7 @@
             return true;
           }
         });
-        this.setChildrenState([item], false);
+        this.setChildrenSelected([item], false);
         this.$emit("on-change", this._updateModels().values, this);
       },
       // 移除全部选项
@@ -295,14 +290,23 @@
         this.$emit("on-change", null, this);
       },
       /**根据数据项找到对应的子节点
-       * @param items 子节点的数据
+       * @param items Object 待设置的节点的数据
+       * @param selected Boolean 选中/取消
        * */
-      setChildrenState(items, selected){
+      setChildrenSelected(items, selected){
+        function set(item, child) {
+          // 把数据匹配的下拉项设置成选中状态，把不匹配的设置成未选中
+          if (child.match(item)) {
+            child.setProps({selected})
+          }
+        }
+
         this.$nextTick(() => {
-          this.$refs.list && this.$refs.list.$children && this.$refs.list.$children.forEach(child => {
-            // 把数据匹配的下拉项设置成选中状态，把不匹配的设置成未选中
-            child.setProps({selected: items.some(item => child.match(item)) ? selected : !selected})
-          })
+          let children = this.$refs.list && this.$refs.list.$children;
+          items.length && items.forEach(item => {
+            children.length && children.forEach(child => set(item, child));
+//            children.length && children.forEach(child => set(item, child));
+          });
         })
       },
       //展开下拉，定位搜索框
@@ -507,11 +511,16 @@
           });
         }
       },
+      /**统一转换下拉数据的格式，兼容json字符串、数组、对象。最终以数组嵌套对象的形式返回：[ {valueField: , labelField}... ]
+       * @param v String|Object|Array 待转换的数据
+       * @param k String valueField
+       * @param l String labelField
+       * @return Array({valueField: , labelField}...)
+       * */
       _convert (v, k, l) {
         let valueField = this.valueField, labelField = this.labelField, obj, arr = [];
         k || (k = valueField);
         l || (l = labelField);
-        //设置数据的时候要经过格式转换。兼容json、数组、对象
         //如果是字符串，先尝试当成json转成对象
         if (typeof v == "string") {
           try {
@@ -555,7 +564,7 @@
         }
         return arr;
       },
-      /**把参数统一成数组格式返回
+      /**把非数组类型的参数简单包装成数组返回，格式统一，便于操作
        * @param v 数组：直接返回，空值(null,undefined,"")：返回空数组，其它：push到数组中返回
        * */
       _convertArray(v){
@@ -607,26 +616,34 @@
       }
     },
     created () {
+      let optionUpdateId;
+      // 自定义下拉选项的数据发生改变，通知Selection组件进行数据更新。为了避免更新频繁，设置了定时器。
+      this.$on("on-selection-option-update", (data, option) => {
+        // 给外部监听的事件
+        this.$emit("on-option-update", data, option, this);
+        clearTimeout(optionUpdateId);
+        optionUpdateId = setTimeout(() => {
+          this.$nextTick(() => {
+            this.items = this.$slots.default ? this.$refs.list.$children.map(child => child.itemData) : this.value;
+            // 所有组件更新完成
+            this.$emit("on-options-updated", this);
+          });
+        }, 200);
+      });
     },
     mounted () {
-      let vue = this, $refs = this.$refs, list = $refs.list;
+      let $refs = this.$refs, list = $refs.list;
       list.addFocusEvent(this.$el);
-      list.$on("on-expand", function () {
-        vue.expand()
-      });
-      list.$on("on-collapse", function () {
-        vue.collapse()
-      });
-      this.$on("on-item-click", function (...args) {
-        this.itemClick(...args)
-      });
+      list.$on("on-expand", () => this.expand());
+      list.$on("on-collapse", () => this.collapse());
+      this.$on("on-item-click", (...args) => this.itemClick(...args));
       // 组件初始化，prop和v-model绑定的数据在set访问器创建之前已经注入进来，无法执行set访问器中的
-      // 初始化下拉的各种变量的数据结构
-//      this._setSelectedItems();
       /**下拉的初始化数据可能来源于value值的绑定，也可能是slot传入
        * @return 如果使用slot传入下拉项，在mounted方法中从selection-option节点中提取出数据对象；反之使用原本的value值
        * */
-      this.items = this.$slots.default ? list.$children.map(child => child.itemData) : this.value;
+      this.$slots.default || (this.items = this.value);
+      // 初始化下拉的各种变量的数据结构
+//       this._setSelectedItems();
       // 绑定value和label的对象监测
       this._watchMap();
     },

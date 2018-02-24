@@ -29,6 +29,9 @@
   white-space: nowrap;
 }
 .m-selection() {
+  .full-width {
+    width: 100%;
+  }
   .selection, .drop-list {
     color: @font-color;
     i {
@@ -37,9 +40,6 @@
     a {
       color: inherit;
       text-decoration: none;
-    }
-    .full-width {
-      width: 100%;
     }
     &.h {
       .list-item {
@@ -162,8 +162,8 @@
     .selection-item {
       position: relative;
       display: inline-block;
-      margin: 4px;
-      padding: 0 @control-padding-tb + 2;
+      margin: 4px @control-padding-tb;
+      padding: 0 @control-padding-tb;
       line-height: 19px;
       background-color: #f7f7f7;
       border: 1px solid @gray-border;
@@ -187,9 +187,7 @@
       left: -1px;
       margin-top: 1px;
       width: 100%;
-      max-height: 260px;
       font-size: @small-size;
-      overflow: auto;
     }
     .search-input {
       margin-bottom: 0;
@@ -233,15 +231,18 @@
         background-color: transparent;
       }
     }
-    .list-item.selected {
-      color: @blue-basic;
-    }
     .search-group {
-      position: relative;
+      position: absolute;
+      top: -@control-height;
+      left: 0;
       z-index: 2;
-      margin: 0 0 @control-padding-tb;
+      padding: 0 @control-padding-lr;
+      width: 100%;
       .drop-list {
         left: 0;
+      }
+      + .list{
+        margin-top: @control-height;
       }
     }
     .search-result {
@@ -286,12 +287,19 @@
         }
       }
     }
+    .list{
+      max-height: 250px;
+      overflow: auto;
+    }
     .list-item {
       .ellipsis;
-      padding: 8px 16px;
+      padding: 8px @control-padding-lr * 2 + 1;
       cursor: pointer;
       &:hover {
         background-color: @bg-hover;
+      }
+      &.selected {
+        color: @blue-basic;
       }
     }
   }
