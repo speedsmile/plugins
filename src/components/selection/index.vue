@@ -188,7 +188,7 @@
             // 默认选项设置完成后同步更改绑定的数据源
             this._updateModels();
           }
-          this.setChildrenSelected(this.selectedItems_, true)
+          this.updateChildrenSelected(this.selectedItems_)
         }
       },
       // 输入关键字进行搜索
@@ -289,7 +289,7 @@
         });
         this.$emit("on-change", null, this);
       },
-      /**根据数据项找到对应的子节点
+      /**设置指定的下拉项的选中状态
        * @param items Object 待设置的节点的数据
        * @param selected Boolean 选中/取消
        * */
@@ -300,16 +300,24 @@
             child.setProps({selected})
           }
         }
-
         this.$nextTick(() => {
           let children = this.$refs.list && this.$refs.list.$children;
           items.length && items.forEach(item => {
             children.length && children.forEach(child => set(item, child));
-//            children.length && children.forEach(child => set(item, child));
           });
         })
       },
-      //展开下拉，定位搜索框
+      /**更新所有下拉选项的选中状态
+       * */
+      updateChildrenSelected(items){
+        items = this._convertArray(items);
+        this.$nextTick(() => {
+          let children = this.$refs.list && this.$refs.list.$children;
+          children.forEach(child => {
+            child.setProps({selected: items.some(item => child.match(item))});
+          });
+        })
+      },
       // Todo 展开下拉，选中项的对应数据要显示在看得见的地方
       expand () {
         if (this.mode == 1 && this.status != "expand") {
