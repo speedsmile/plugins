@@ -255,19 +255,21 @@
     methods: {
       // 添加选中项
       addSelection (item) {
-        let selections = this.selectedItems, valueField = this.valueField, selectedValue;
+        let selections = this.selectedItems, valueField = this.valueField, values, labels;
         if (this.multiple) {
-          selectedValue = [];
           //不能重复添加同一个选中项
           selections.every(i => item[valueField] !== i[valueField]
           ) && (selections.push(item));
-          selectedValue = this._updateModels().values;
+          let models = this._updateModels();
+          values = models.values;
+          labels = models.labels;
           this.setChildrenSelected(this.selectedItems, true);
         } else {
           this.selectedItems = [item];
-          selectedValue = item[valueField]
+          values = item[valueField];
+          labels = item[this.labelField];
         }
-        this.$emit("on-change", selectedValue, this)
+        this.$emit("on-change", values, labels, this)
       },
       //移除选中项
       removeSelection (item) {
@@ -279,7 +281,8 @@
           }
         });
         this.setChildrenSelected([item], false);
-        this.$emit("on-change", this._updateModels().values, this);
+        let models = this._updateModels(), values = models.values, labels = models.labels;
+        this.$emit("on-change", values, labels, this);
       },
       // 移除全部选项
       removeAll(){
@@ -287,7 +290,7 @@
         this.$refs.list.$children.forEach(child => {
           child.selected = false
         });
-        this.$emit("on-change", null, this);
+        this.$emit("on-change", null, null, this);
       },
       /**设置指定的下拉项的选中状态
        * @param items Object 待设置的节点的数据
@@ -406,7 +409,7 @@
           this._set("value", values);
         }
         this.$emit("on-model-change", model, this);
-        this.$emit("on-value-change", values, this);
+        this.$emit("on-value-change", values, labels, this);
         return {model, labels, values};
       },
       /**外部数据发生变化，同步设置下拉选中项。

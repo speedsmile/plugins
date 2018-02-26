@@ -8,6 +8,6 @@
 ## 事件
 | 事件名 | 说明 | 回调参数 |
 | :--| :-- | :-- |
-| on-change | 选中项发生改变，一般是手动操作改变 | 下拉选中的值 |
+| on-change | 选中项发生改变，一般是手动操作改变 | 1、所有选中的value值；2、所有选中的文本 |
 | on-model-change | vmodel发生改变时触发。如果model映射label，改变value引起label变化，同样触发该事件 | vmodel改变后的值 |
-| on-value-change | 选中的value发生变化时触发（只要数据发生改变就触发） | 选中的value值 |
+| on-value-change | 选中的value发生变化时触发（只要数据发生改变就触发） | 1、所有选中的value值；2、所有选中的文本 |

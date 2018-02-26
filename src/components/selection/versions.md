@@ -2,6 +2,7 @@
 
 * 0.1.0  (2018-02-24)
   * 修复on-change事件回调第一个参数只有当前选择的下拉选项数据的bug，应该是所有选中的下拉数据。
+  * on-change和on-value-change回调中第一个参数是选中的values，第二个参数增加选中的labels（下拉项对应的文本）。
   * 自定义selection-option只在selection组件第一次初始化的时候把数据绑定在selection组件上，无法适用于多次改变数据源的情况。
     这一版本开始，只要自定义selection-option组件发生变更，自动通知父级selection更新数据状态（下拉数据，选中数据）。
   * 修复使用自定义的下拉选项后，搜索功能失效的bug。
