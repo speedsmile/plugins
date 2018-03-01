@@ -2,11 +2,11 @@
  * Created by weikaiwei on 2017/1/10.
  */
 let type = require("./type");
-module.exports = function extend() {
-  var options, name, src, copy, copyIsArray, clone,
-    target = arguments[ 0 ] || {},
+module.exports = function extend(...args) {
+  let options, name, src, copy, copyIsArray, clone,
+    target = args[ 0 ] || {},
     i = 1,
-    length = arguments.length,
+    length = args.length,
     deep = false;
 
   // Handle a deep copy situation
@@ -14,7 +14,7 @@ module.exports = function extend() {
     deep = target;
 
     // Skip the boolean and the target
-    target = arguments[ i ] || {};
+    target = args[ i ] || {};
     i++;
   }
 
@@ -32,7 +32,7 @@ module.exports = function extend() {
   for ( ; i < length; i++ ) {
 
     // Only deal with non-null/undefined values
-    if ( ( options = arguments[ i ] ) != null ) {
+    if ( ( options = args[ i ] ) != null ) {
 
       // Extend the base object
       for ( name in options ) {

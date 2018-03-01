@@ -72,7 +72,7 @@ function m() {
         let getSetter = Format.getSetter, charts = "", current, store, setterName;
         for (let i = 0, l = format.length; i < l; i++) {
           current = format.charAt(i);
-          store === undefined && (store = current)
+          store === undefined && (store = current);
           if(current != store){
             if(setterName = getSetter(store)){
               date[setterName](setterName == "setMonth" ? charts - 1 : charts);
