@@ -134,7 +134,7 @@ export default {
       ],
       arr: [],
       obj: {aaa: "aaa", bbb: "bbb", ccc: "ccc"},
-      items: [{"value":"1","label":"北京"},{"value":"2","label":"上海"},{"value":"3","label":"广州"},{"value":"4","label":"深圳"},{"value":"5","label":"天津"},{"value":"6","label":"重庆"}],
+      items: [{"value":"1","label":"北京"},{"value":"2","label":"上海"},{"value":"3","label":"广州"},{"value":"4","label":"深圳"},{"value":"5","label":"天津"},{"value":"6","label":"重庆"},{"value":"7","label":"福建"},{"value":"8","label":"厦门"},{"value":"9","label":"广西"},{"value":"10","label":"青岛"},{"value":"11","label":"香港"},{"value":"12","label":"澳门"}],
       selectedItems: [{"value":"1","label":"北京"},{"value":"2","label":"上海"},{"value":"3","label":"广州"}]
     }
   },
