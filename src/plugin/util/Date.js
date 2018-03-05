@@ -156,7 +156,7 @@ function m() {
         s = date.getSeconds(),
         arr = [y, M, d, h, m, s], map = "YMDHIS";
       return (format || "YYYY-MM-DD HH:II:SS").replace(reg, function (a) {
-        let f = a.charAt(0), index = map.indexOf(f);
+        let f = a.charAt(0).toUpperCase(), index = map.indexOf(f);
         // 除了年份，其他时间位数不够自动前缀补0
         return f == "Y" ? arr[index].toString().slice(-a.length) : dateFormat(arr[index], a.length);
       });
