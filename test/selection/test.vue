@@ -1,11 +1,13 @@
 <template>
     <div>
-      <button @click="i=!i" style="width: 100px;height:32px;"></button>
+      <button @click="click" style="width: 100px;height:32px;"></button>
       <i-form ref="editData" :model="editData" :rules="ruleValidate">
         <form-item label="selection" prop="selection" v-if="i">
-          <selection v-model="editData.selection" :value="items" placeholder="请选择"
-                     clearable clear-model multiple
+          <selection ref="selection" v-model="editData.values" model="value" :value="items" placeholder="请选择"
+                     :filter-method="function (v, cb) {cb({1: 'aaa', 2: 'bbb', 3: 'ccc'})}" @on-change="onChange"
+                     clearable clear-model  default-index="2"
           >
+            <!--<selection-option v-for="i in items" :value="i.value">{{i.label}}</selection-option>-->
           </selection>
         </form-item>
         <!--<form-item label="selection" prop="selection" v-if="i">-->
@@ -55,7 +57,7 @@ export default {
       editData: {
         selection: "2",
         labels: null,
-        values: null,
+        values: null,//[{value: "2"}, {value: "22", label: "dfdf"}],
         select: null,
         arr: []
       },
@@ -149,6 +151,11 @@ export default {
     },
     des(){
       debugger;
+    },
+    click(){
+      this.items = this.selectedItems;
+    },
+    onChange(a,b,c){
     }
   },
   mounted(){

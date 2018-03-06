@@ -10,3 +10,12 @@
     方案：下拉选项和搜索结果分开使用2个显示区域。
   * 修复直接设置下拉的选中值，下拉选项的选中状态不准确的bug。
   * 样式：下拉选项很多出现垂直滚动条时，搜索框不随着下拉内容滚动。
+
+* 1.0.0  (2018-03-06)
+  这一版的变化较大，不再支持value和label分别绑定2个数据模型上。
+  如果有需要，在on-change或者on-value-chang事件上获得选中的value和label。
+  * v-model映射的数据格式是键值对类型
+  * props：model的取值有"pair"（默认）、"value"、"label"
+  * 删除props：context、model、label-model、value-model。
+  * 新增props：select，设置/获取选中的下拉数据
+  * 新增属性：selectedValue、selectedLabel，用作内部保存选中的value和label
