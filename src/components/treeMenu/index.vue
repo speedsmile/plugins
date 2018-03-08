@@ -224,6 +224,7 @@
               this.openStateParents(state);
             }
           }else{
+            state.isSelected = false;
             if(notSelected === true){ // 关闭未选中的节点
             }
           }
