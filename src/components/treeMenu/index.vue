@@ -52,15 +52,17 @@
       return {
         _root_: null, // 对应root
         // 状态数据，记录一个树节点的状态变化，不关联到原始的数据上
-        state: {
-          // key: { // 节点的唯一标识
-          //    index: 数据的唯一标志，如果没有指定id，这个值将起作用。父index_子index
-          //    isOpen: 1, //展开
-          //    isClose: 0, //收回
-          //    isSelected: 0, //是否选中
-          //    isLeaf: 0, // 是否叶节点
-          // }
-        }
+        substates: [
+//          {
+//            key: { // 节点的唯一标识
+//              index: null, //数据的唯一标志，如果没有指定id，这个值将起作用。父index_子index
+//              isOpen: 1, //展开
+//              isClose: 0, //收回
+//              isSelected: 0, //是否选中
+//              isLeaf: 0, // 是否叶节点
+//            }
+//          }
+        ]
       }
     },
     computed: {
@@ -99,7 +101,8 @@
        * @return 返回指定节点的指定状态的值
        * */
       getState: function (node, stateName) {
-        return arguments.length < 2 ? this.state[node[this.keyField]] : this.state[node[this.keyField]] && this.state[node[this.keyField]][stateName];
+        let states = this._root_.state;
+        return arguments.length < 2 ? states[node[this.keyField]] : states[node[this.keyField]] && states[node[this.keyField]][stateName];
       },
       /**设置指定节点中特定状态的值
        * @param node Object 树节点
@@ -107,7 +110,8 @@
        * @param value Object 节点状态值
        * */
       setState: function (node, stateName, value) {
-        this.state[node[this.keyField]][stateName] = value
+        let states = this._root_.state;
+        states[node[this.keyField]][stateName] = value
       },
       /**展开/关闭节点。
        * @node Object 节点数据对象
@@ -169,7 +173,7 @@
         state || (state = this.getState(node));
         if (this.isRoot()) {
           // 事件冒泡到根节点上，手动触发
-          this.$emit(e, node, state, this.value, this.state);
+          this.$emit(e, node, state, this.value, this.substates);
         } else {
           if ($parent.name === this.name && $parent.emit) {
             $parent.emit.call($parent, e, node, state);
@@ -193,18 +197,62 @@
             break;
         }
       },
+      /**把非数组类型的参数简单包装成数组返回，格式统一，便于操作
+       * @param v 数组：直接返回，空值(null,undefined,"")：返回空数组，其它：push到数组中返回
+       * */
+      toArray(v){
+        return v instanceof Array ? v : v ? [v] : []
+      },
+      getSelectedNodes(){
+        let selectedNodes = this._root_.selectedNodes;
+        return this.multiple ? selectedNodes : selectedNodes[0];
+      },
+      /**默默地选中节点，调用此方法不会触发节点选中事件
+       * @param nodes Array|Object 需要选中的节点
+       * @param selected Boolean 选中的节点的展开状态
+       * @param notSelected Boolean 未选中的节点的展开状态。不设置就是维持当前的展开状态
+       * */
+      setSelectedNodes(nodes, selected = true, notSelected = undefined){
+        // 查找节点
+        this._root_.selectedNodes = nodes = this.toArray(nodes);
+        nodes && nodes.length && this.everyNode( (node, state) => {
+          let k = Object.prototype.toString.call(node) == "[object String]" ? node : node[this.keyField];
+          let matches = nodes.some( n => n[this.keyField] == k );
+          if(matches){
+            state.isSelected = matches;
+            if(selected){ // 自动展开选中的节点的所有父节点
+              this.openStateParents(state);
+            }
+          }else{
+            if(notSelected === true){ // 关闭未选中的节点
+            }
+          }
+        });
+      },
+      /**展开所有的父节点
+       * */
+      openStateParents(state){
+        state.open = true;
+        let parent = state.parent;
+        while(parent){
+          state = this.getState(parent);
+          this.toggleItem(parent, true);
+          parent = state.parent;
+        }
+      },
       /**数据变化时要执行的重构方法
        * */
       dataChange: function () {
         this._root_ = this.root;
         // 初始化数据格式
         this.serialize();
+        this.setSelectedNodes(this.getSelectedNodes());
       },
       /**整理节点数据，给每个节点生成一个state对象，记录该节点的
        * */
       serialize: function () {
         let $this = this, treeData = this.menuList, state = {}, keyFiled = this.keyField, selectField = this.select,
-          isRoot = this.isRoot(), parent, rootData, rootMap, rootState;
+          isRoot = this.isRoot(), parent;
         parent = this.parent;
         // 把子节点数据挂载到父节点下
         if (parent) {
@@ -218,12 +266,11 @@
           this._root_ = {
             data: [], // 数组格式全部节点
             map: {}, // 对象格式全部节点
-            state: {} // 对象格式全部节点的状态
+            state: {}, // 对象格式全部节点的状态
+            selectedNodes: [],
           };
         }
-        rootData = this._root_.data;
-        rootMap = this._root_.map;
-        rootState = this._root_.state;
+        let _root_ = this._root_, rootData = _root_.data, rootMap = _root_.map, rootState = _root_.state, selectedNodes = _root_.selectedNodes;
         // 整理节点集合，给每个节点数据保存一条对应的状态数据
         treeData.forEach((item, index) => {
           // 如果数据没有指定key，使用keyIndex作为唯一标识
@@ -231,20 +278,21 @@
             key = item[keyFiled] || keyIndex,
             isLeaf = $this.isLeaf(item), isOpen = item[this.open];
           state[key] = {
-            key: key,
-            keyIndex: keyIndex,
-            parent: parent,
-            isRoot: isRoot,
-            isLeaf: isLeaf,
-            isOpen: isLeaf ? 0 : isOpen, // 默认都是open状态
+            key,
+            keyIndex,
+            parent,
+            isRoot,
+            isLeaf,
+            isOpen: isLeaf ? 0 : isOpen, // 默认都是关闭状态
             isClose: isLeaf ? 0 : !isOpen,
             isSelected: item[selectField]
           };
           rootData.push(item);
           rootMap[key] = item;
           rootState[key] = state[key];
+          item[selectField] && (selectedNodes.push(item))
         });
-        this.state = state;
+        this.substates = state;
       }
     },
     watch: {

@@ -1,5 +1,5 @@
 {
-  "name": "treeMenu",
+  "name": "tree-menu",
   "version": "0.0.1",
   "description": "树形状菜单",
   "main": "index.vue",
