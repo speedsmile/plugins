@@ -4,6 +4,6 @@
   "main": "index.vue",
   "description": "下拉组件",
   "dependencies": {
-    "jquery": "^2.2.4"
+    "zepto": "^1.2.0"
   }
 }

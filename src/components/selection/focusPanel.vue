@@ -8,7 +8,9 @@
   </div>
 </template>
 <script>
-  import $ from "./jquery";
+  import "zepto/src/zepto";
+  import "zepto/src/event";
+  import "zepto/src/selector";
   export default {
     name: "focus-panel",
     data () {
@@ -52,8 +54,8 @@
         }
         //如果焦点不在面板上任何一个元素上，把焦点设置到默认元素上
         else if (!this.hasFocusEl()) {
-          $focus = this.$content.find("input:visible:first");
-          $focus.length ? $focus[0].focus() : $focus = this.$content.find("a[href]:visible:first");
+          $focus = this.$content.find("input:visible").first();
+          $focus.length ? $focus[0].focus() : $focus = this.$content.find("a[href]:visible").first();
           this.shiftFocus($focus.length ? $focus : this.$defaultFocus);
         }
       },
@@ -76,8 +78,10 @@
           return vue.contains(item, document.activeElement);
         });
       },
+      /**检测a是否包含b
+       * */
       contains: function (a, b) {
-        return a == b || $.contains(a, b);
+        return a && b && a == b || a.contains(b);
       },
       /** 把焦点面板的作用区域扩大到一些不在焦点面板区域的其它元素上。
        * 1、指定的元素获得焦点导致面板丢失焦点的时候视同面板有焦点，它们失去焦点时触发面板焦点丢失；

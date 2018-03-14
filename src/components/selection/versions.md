@@ -19,3 +19,4 @@
   * 删除props：context、model、label-model、value-model。
   * 新增props：select，设置/获取选中的下拉数据
   * 新增属性：selectedValue、selectedLabel，用作内部保存选中的value和label
+  * 把对jquery的依赖改成对zepto的依赖，减少体积

@@ -108,8 +108,6 @@
       }
     },
     props: {
-      //下拉组件的模式状态：0，禁用；1，正常可编辑（默认）
-      mode: {default: 1},
       placeholder: {type: String, default: ""},
       valueField: {type: String, default: "value"},
       labelField: {type: String, default: "label"},
@@ -122,12 +120,8 @@
        * 默认不启用。设置该字段后索引值默认是0
        * */
       defaultIndex: {default: null},
-      model: {type: String, default: "pair"},
-      clearModel: {type: Boolean, default: false},
       // 是否多选
       multiple: {type: Boolean, default: false},
-      // 是否显示清除
-      clearable: {type: Boolean, default: false},
       /**对下拉数据筛选
        * 假值：关闭搜索功能；
        * 真值（默认）：本地搜索，只对下拉中的数据新进筛选；
@@ -138,7 +132,15 @@
       filterMethod: Function,
       filterPlaceholder: {type: String, default: "请输入关键字"},
       // 连续输入搜索字符停顿N毫秒后认为输入结束，然后开始执行搜索
-      filterDelay: {type: Number, default: 300}
+      filterDelay: {type: Number, default: 300},
+      clearable: {type: Boolean, default: false},
+
+      //下拉组件的模式状态：0，禁用；1，正常可编辑（默认）
+      mode: {default: 1},
+      model: {type: String, default: "pair"},
+      // 是否显示清除
+      // 下拉组件销毁时是否把对应的v-model设置成null
+      clearModel: {type: Boolean, default: false}
     },
     computed: {
       // 下拉数据，对应prop——value
