@@ -9,6 +9,4 @@ define( [
     "jquery/src/data",
     "jquery/src/attributes",
     "jquery/src/manipulation"
-], function( jQuery ) {
-    return ( self.jQuery = self.$ = jQuery );
-} );
+], $ => $);
