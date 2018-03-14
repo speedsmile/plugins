@@ -12,7 +12,6 @@ define( [
     "jquery/src/event/focusin",
     "jquery/src/event/alias",
     "jquery/src/manipulation",
-    // "jquery/src/wrap",
     "jquery/src/css",
     "jquery/src/effects",
     "jquery/src/effects/animatedSelector",
