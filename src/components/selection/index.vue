@@ -21,7 +21,7 @@
     <focus-panel ref="list" class="drop-list">
       <slot name="drop">
         <!-- 搜素区域 -->
-        <div class="search-group" v-show="filterable">
+        <div class="search-group" v-if="filterable">
           <!-- 搜索框 -->
           <div class="input-group">
             <input type="text" class="search-input" v-model="searchKeywords" :placeholder="filterPlaceholder">
