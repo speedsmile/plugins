@@ -79,7 +79,9 @@ function htmlTemplate(module, o){
   },
     config = Object.assign({}, defaults, o),
     htmlTemplates = {
-    "m": path.resolve(__dirname, "template/m.html")
+    "m": path.resolve(__dirname, "template/m.html"),
+    "vue/pc": path.resolve(__dirname, "template/vue/pc.html"),
+    "vue/m": path.resolve(__dirname, "template/vue/m.html"),
   };
   let chunks = config.chunks ? ((config.chunks instanceof Array) ? config.chunks : [config.chunks]) : ["manifest", "vendor", module];
   // chunks中的"."会被替换成当前模块，如果存在chunksPath，自动加上作为chunks的父级路径
