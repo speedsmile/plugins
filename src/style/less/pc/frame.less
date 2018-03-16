@@ -24,6 +24,7 @@ body {
 
 .layout-menu-left{
   font-size:30px;
+  flex-shrink: 0;
   &.bg-color {
     background: @color-bg-slidebar;
     border-right:1px solid  @color-bottom-slide;
@@ -69,6 +70,7 @@ body {
 .layout-menu-right {
   width: 100%;
   min-width: 800px;
+  flex-shrink: 1;
   background-color: #d9e0e7;
   .layout-header{
     height: 70px;
@@ -86,9 +88,6 @@ body {
       border-right:1px solid @color-bottom-slide;
       border-radius:0;
       padding:0 35px;
-      .icon-quanbushangpin {
-        font-size:32px;
-      }
     }
     .more-action{
       @hit-padding: 5px;
