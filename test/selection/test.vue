@@ -2,7 +2,7 @@
     <div>
       <button @click="click" style="width: 100px;height:32px;"></button>
       <i-form ref="editData" :model="editData" :rules="ruleValidate">
-        <form-item label="selection" prop="selection" v-if="i">
+        <form-item label="selection" prop="selection">
           <selection ref="selection" v-model="editData.values" model="value" :value="items" placeholder="请选择"
                      :filter-method="function (v, cb) {cb({1: 'aaa', 2: 'bbb', 3: 'ccc'})}" @on-change="onChange"
                      clearable clear-model  default-index="2"
@@ -10,33 +10,21 @@
             <!--<selection-option v-for="i in items" :value="i.value">{{i.label}}</selection-option>-->
           </selection>
         </form-item>
-        <!--<form-item label="selection" prop="selection" v-if="i">-->
-          <!--<selection v-model="editData.selection" :value="items"  placeholder="请xcvxc选择"-->
+        <!--<form-item label="selection" prop="selection">-->
+          <!--<selection :value="items"  placeholder="请xcvxc选择"-->
                      <!--:filter-method="filter" clearable clear-model-->
                      <!--label-model="labels" :context="this" multiple-->
                      <!--@on-change="log('change')" @on-destroyed="log(this)"-->
           <!--&gt;-->
-
-            <!--&lt;!&ndash;<selection-option :value="i" v-for="i in 5" :a="i">&ndash;&gt;-->
-            <!--&lt;!&ndash;test  kl&ndash;&gt;-->
-            <!--&lt;!&ndash;<span :a="i" :class="{a: i==2}">0.5KM</span>&ndash;&gt;-->
-            <!--&lt;!&ndash;</selection-option>&ndash;&gt;-->
-            <!--&lt;!&ndash; 注释 &ndash;&gt;-->
-            <!--&lt;!&ndash;<div value="500">0.5KM</div>&ndash;&gt;-->
-            <!--&lt;!&ndash;<div value="1000">1KM</div>&ndash;&gt;-->
-            <!--&lt;!&ndash;<div value="2000">2KM</div>&ndash;&gt;-->
-            <!--&lt;!&ndash;<div value="3000">3KM</div>&ndash;&gt;-->
-            <!--&lt;!&ndash;<div value="4000">4KM</div>&ndash;&gt;-->
-            <!--&lt;!&ndash;<div value="5000">5KM</div>&ndash;&gt;-->
           <!--</selection>-->
         <!--</form-item>-->
-        <!--<form-item label="select" prop="select">-->
-          <!--<div class="groups cat-pre">-->
-            <!--<i-select v-model="editData.select" clearable>-->
-              <!--<i-option v-for="i in items" :key="i.value" :value="i.value">{{i.label}}</i-option>-->
-            <!--</i-select>-->
-          <!--</div>-->
-        <!--</form-item>-->
+        <form-item label="select" prop="select">
+          <div class="groups cat-pre">
+            <i-select v-model="editData.select" clearable>
+              <i-option v-for="i in items" :key="i.value" :value="i.value">{{i.label}}</i-option>
+            </i-select>
+          </div>
+        </form-item>
       </i-form>
     </div>
 </template>
@@ -70,6 +58,7 @@ export default {
             trigger: 'change',
             message: "不能为空",
             validator: function(rule, value, callback){
+              debugger
               console.log("change = " + value)
               if(value)callback();
               else callback(rule.message)
