@@ -39,7 +39,7 @@ Rule.prototype = {
   addRule(units, rule){
     units = units.split(this.split).map(unit => "(?:" + unit + ")").join("|");
     // 单位严格区分大小写
-    let reg = new RegExp("(\\d*\\.?\\d+)(" + units + ")", "ig");
+    let reg = new RegExp("(\\d*\\.?\\d+)(" + units + ")", "g");
     this._rules.push([reg, rule]);
   },
   /**把指定css文本按照规则进行转换，然后返回
