@@ -14,9 +14,25 @@
 * 1.0.0  (2018-03-06)
   这一版的变化较大，不再支持value和label分别绑定2个数据模型上。
   如果有需要，在on-change或者on-value-chang事件上获得选中的value和label。
-  * v-model映射的数据格式是键值对类型
-  * props：model的取值有"pair"（默认）、"value"、"label"
-  * 删除props：context、model、label-model、value-model。
-  * 新增props：select，设置/获取选中的下拉数据
+  * 删除props——context、label-model、value-model。
+  * 重新定义props——model，影响v-model绑定值的数据格式
+    "pair"，默认， v-model的数据格式是{valueField, labelField}（已实现）
+    "value", v-model只绑定valueField（暂未实现）
+    "label", v-model只绑定labelField（暂未实现）
+    以上3种类型在多选模式下返回的都是数组格式，嵌套上述的类型
   * 新增属性：selectedValue、selectedLabel，用作内部保存选中的value和label
-  * 把对jquery的依赖改成对zepto的依赖，减少体积
+  * 去掉了Selection中耦合的iview校验模块的mixins，引用方应该在引用的业务中根据情况加入iview校验的逻辑
+    ````javascript
+      import selection from "selection";
+      import option from "selection/option";
+
+      /* 加入iview校验框架的行为通知，不使用iview框架不需要以下代码  start */
+      import ForIView from 'selection/ForIView/ForIView';
+      selection.mixins || (selection.mixins = []);
+      selection.mixins.push(ForIView);
+      /* 加入iview校验框架的行为通知  end */
+
+      Vue.component(selection.name, selection);
+      Vue.component(option.name, option);
+    ````
+  * FocusPanel组件把对jquery的依赖改成对zepto的依赖，减少体积

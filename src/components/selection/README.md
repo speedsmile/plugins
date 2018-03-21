@@ -23,6 +23,7 @@
 | filter-placeholder | String | 搜索框显示的文字提示 | 请输入关键字 |
 | filter-delay | Number（毫秒） | 搜索动作太过频繁，设置延时时间 | 300 |
 | clearable | Boolean | 单选模式下是否可以清空下拉选项<br>多选模式下在最后出现一个叉叉一次性清除所有选中项 | false |
+| value-equal | Function(a,b):Boolean | 比较下拉控件的value是否相等，默认采用 === 的方式。<br>对于复杂的value格式，比如{value: 1}和{value: 1}，[1]和[1]，在程序上是不相等的，但在业务逻辑上可能视为相等。需要重写判断的方法 | function(a,b){return a===b} |
 
 ## 事件
 | 事件名 | 说明 | 回调参数 |

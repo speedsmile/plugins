@@ -55,13 +55,12 @@
   </div>
 </template>
 <script>
-  // TODO 增加配置参数，value项是要强等于还是弱等于。目前是强等于
   import "./selection.less";
   import focusPanel from "./focusPanel.vue";
   import SelectionOption from "./option.vue";
 
   // 配合iview的Form组件的校验框架，需要引入该ForIView模块。不使用iview则不需要引用此模块
-  import ForIView from './ForIView/ForIView';
+
   import extend from './Extend';
 
   /**把虚拟的dom节点VNode解析成正常的dom结构
@@ -92,7 +91,6 @@
   }
   export default {
     name: "selection",
-    mixins: [ForIView],
     components: {focusPanel, "SelectionOption": SelectionOption},
     model: {
       prop: 'vModel',
@@ -134,6 +132,13 @@
       // 连续输入搜索字符停顿N毫秒后认为输入结束，然后开始执行搜索
       filterDelay: {type: Number, default: 300},
       clearable: {type: Boolean, default: false},
+      // 比较下拉项对象是否相等的方法，默认 ===
+      valueEqual: {
+        type: Function,
+        default: (a, b) => {
+          return a === b;
+        }
+      },
 
       //下拉组件的模式状态：0，禁用；1，正常可编辑（默认）
       mode: {default: 1},
@@ -260,7 +265,7 @@
         let selections = this.selectedItems, valueField = this.valueField, models;
         if (this.multiple) {
           //不能重复添加同一个选中项
-          selections.every(i => item[valueField] !== i[valueField]) && (selections.push(item));
+          selections.every(i => !this.valueEqual(item[valueField], i[valueField])) && (selections.push(item));
           models = this._updateModels();
           this.setChildrenSelected(this.selectedItems, true);
         } else {
@@ -272,8 +277,8 @@
       //移除选中项
       removeSelection (item) {
         let selections = this.selectedItems, valueField = this.valueField;
-        selections.some(function (i, index) {
-          if (item[valueField] === i[valueField]) {
+        selections.some((i, index) => {
+          if (this.valueEqual(item[valueField], i[valueField])) {
             selections.splice(index, 1);
             return true;
           }
@@ -346,17 +351,16 @@
         }
       },
       /**列表项的点击选择事件
-       * @param item，点击项。item.type==1，不选中该项，开启对应的二级标签
+       * @param item，点击项。
        */
       itemClick (item) {
         this.addSelection(item);
-        this.multiple === false && this.collapse();
+        // 多选状态下，选中一个下拉项不会自动关闭下拉
+        this.multiple || this.collapse();
       },
       isSelected (item) {
         let valueField = this.valueField;
-        return this.selectedItems && this.selectedItems.some(function (selectionItem) {
-            return selectionItem[valueField] === item[valueField];
-          });
+        return this.selectedItems && this.selectedItems.some(selection => this.valueEqual(selection[valueField], item[valueField]));
       },
       // 本地数据过滤的默认方法
       localFilter(){
@@ -556,7 +560,7 @@
         if (!hasValue && !hasLabel) { // 跳过空值
           return null;
         } else if (hasValue) { // 有value，尝试着从下拉中查找和value匹配得上的label，没有则使用指定的label
-          items.find(n => (n[valueField] === value) && (label = n[labelField], true));
+          items.find(n => (this.valueEqual(n[valueField], value)) && (label = n[labelField], true));
         }
         // 剩下只有label的情况。选中项中显示label，value空着，多选状态下的value数组也空着
         return {[valueField]: value, [labelField]: label}
@@ -574,7 +578,7 @@
         clearTimeout(optionUpdateId);
         optionUpdateId = setTimeout(() => {
           this.$nextTick(() => {
-            this.items = this.$slots.default ? this.$refs.list.$children.map(child => child.itemData) : this.value;
+            this.items = this.$slots.default ? this.$refs.list.$children.map(child => child.state.item) : this.value;
             // 所有组件更新完成
             this.$emit("on-options-updated", this);
           });
