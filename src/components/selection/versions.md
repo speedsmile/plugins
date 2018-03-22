@@ -15,10 +15,10 @@
   这一版的变化较大，不再支持value和label分别绑定2个数据模型上。
   如果有需要，在on-change或者on-value-chang事件上获得选中的value和label。
   * 删除props——context、label-model、value-model。
-  * 重新定义props——model，影响v-model绑定值的数据格式
-    "pair"，默认， v-model的数据格式是{valueField, labelField}（已实现）
-    "value", v-model只绑定valueField（暂未实现）
-    "label", v-model只绑定labelField（暂未实现）
+  * 重新定义props——model，下拉选中项的数据格式
+    "pair"，默认， {valueField, labelField}
+    "value", valueField
+    "label", labelField
     以上3种类型在多选模式下返回的都是数组格式，嵌套上述的类型
   * 新增属性：selectedValue、selectedLabel，用作内部保存选中的value和label
   * 去掉了Selection中耦合的iview校验模块的mixins，引用方应该在引用的业务中根据情况加入iview校验的逻辑

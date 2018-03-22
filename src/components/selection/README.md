@@ -14,9 +14,10 @@
 | :-- | :-- | :-- | :-- |
 | value | Array<br>Object | 根据默认规则自动生成下拉选项<br>Array:[{valueFiled: 值, labelField: 显示的文本}...]<br>Object:{key:value ...}。自定义下拉选项的话参见默认的slot | 无 |
 | value-field | String | 自动生成下拉遍历value中的数据时识别用作value字段的标识 | value |
-| label-field | String | 自动生成下拉遍历value中的数据时识别用作显示下拉文本字段的标识 | value |
-| placeholder | String | 没有选中项时的提示文字 | 无 |
+| label-field | String | 自动生成下拉遍历value中的数据时识别用作显示下拉文本字段的标识 | label |
+| model | String | 设置下拉选中数据的格式<br>"pair": {valueFiled, labelField}<br>"value": valueField<br>"label": labelField | pair |
 | default-index | Number | 默认选中下拉的第几个选项，索引从0开始 | 无 |
+| placeholder | String | 没有选中项时的提示文字 | 无 |
 | multiple | Boolean | 是否可以多选 | false |
 | filterable | Boolean | 是否可以搜索 | true |
 | filter-method | Function(keywords, callback) | 开启搜索功能后，自定义搜索方法。把搜索结果传入callback参数中，格式和value一致 | 内置根据输入关键字过滤下拉项的方法 |

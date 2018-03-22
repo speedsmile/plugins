@@ -3,7 +3,7 @@
     <button @click="click" style="width: 100px;height:32px;"></button>
     <i-form ref="editData" :model="editData" :rules="ruleValidate">
       <form-item label="selection">
-        <selection ref="selection" v-model="editData.values" model="value" :value="items" placeholder="请选择"
+        <selection ref="selection" multiple v-model="editData.values" model="value" :value="items" placeholder="请选择"
                    :filter-method="function (v, cb) {cb({1: 'aaa', 2: 'bbb', 3: 'ccc'})}" @on-change="onChange"
                    clearable clear-model default-index="2"
         >
@@ -46,7 +46,7 @@
         editData: {
           selection: "2",
           labels: null,
-          values: null,//[{value: "2"}, {value: "22", label: "dfdf"}],
+          values: ["4", "2"],
           select: null,
         },
         ruleValidate: {
@@ -153,6 +153,7 @@
         this.items = this.selectedItems;
       },
       onChange(a, b, c){
+        debugger
       }
     },
     mounted(){
