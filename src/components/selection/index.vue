@@ -412,26 +412,22 @@
         if (this.status == "beforeDestroy" || this.status == "destroyed")return;
         let items = [], values = [], labels = [], vModel = this.vModel;
         vModel = this._convertArray(vModel);
-        if(this.multiple){
-          for (let m of vModel) {
-            let value, label;
-            if(this.model == "value"){
-              value = m;
-            }else if(this.model == "label"){
-              label = m;
-            }else{
-              value = m[this.valueField];
-              label = m[this.labelField];
-            }
-            let item = this._findItem(value, label);
-            if (item) {
-              items.push(item);
-              values.push(item[this.valueField]);
-              labels.push(item[this.labelField]);
-            }
+        for (let m of vModel) {
+          let value, label;
+          if(this.model == "value"){
+            value = m;
+          }else if(this.model == "label"){
+            label = m;
+          }else{
+            value = m[this.valueField];
+            label = m[this.labelField];
           }
-        }else{
-          items = vModel;
+          let item = this._findItem(value, label);
+          if (item) {
+            items.push(item);
+            values.push(item[this.valueField]);
+            labels.push(item[this.labelField]);
+          }
         }
         // 设置了value，label的值可能会发生改变，需要label的值同步到响应的字段
         this.selectedItems = items;
