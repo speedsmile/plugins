@@ -4,8 +4,7 @@
   "description": "插件",
   "main": "",
   "scripts": {
-    "dev": "node build/dev-server.js",
-    "simplepack": "webpack --config webpack.simplepack.js"
+    "dev": "node build/dev-server.js"
   },
   "author": "",
   "license": "ISC",

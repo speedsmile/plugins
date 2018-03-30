@@ -1,1 +1,0 @@
-start pack.bat
