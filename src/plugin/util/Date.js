@@ -230,8 +230,8 @@ function m () {
     },
     /**在指定的日期对象的基础上进行日期时间上的偏移
      * 指定一个日期，给定一个偏移量，计算出指定日期在指定的日上偏移后的新日期对象
-     * @param date，Date 指定的日期，只有一个参数的情况下this指代date
-     * @param options, Object 偏移量{year: , month: , date: }
+     * @param date Date 指定的日期，只有一个参数的情况下this指代date
+     * @param options Object 偏移量{year: , month: , date: }
      *      如果options是数值类型，则视为天数
      * @param m Boolean
      *      false 叠加模式，小于0在当前时间上叠加，大于0直接覆盖当前时间
@@ -259,12 +259,13 @@ function m () {
      * 和toDate方法的区别：当指定的时间是非负数时，直接覆盖对应时间上的时间；toDate方法是在当前基础上累加。
      * 参数是负数则和toDate方法一样在当前时间上累加
      *
-     * @param date，Date 指定的日期对象，只有一个参数的情况下this指代date
-     * @param options, Object 重置参数{year: , month: 0—11, date: ,hour: , minute, second: }
+     * @param date Date 指定的日期对象，只有一个参数的情况下this指代date
+     * @param options Object 重置参数{year: , month: 0—11, date: ,hour: , minute, second: }
      * @return Date 返回重置后的日期对象，不改变当前日期对象
      * */
-    setDate: function (...args) {
-      return this.toDate(...args, true);
+    setDate: function (date, options) {
+      arguments.length < 2 && (options = date, date = this);
+      return this.toDate(date, options, true);
     },
     /**获取当前的日期（默认YMDHis），支持format模式
      * */
