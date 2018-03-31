@@ -10,7 +10,7 @@
  * toString：1、保留小数点的功能；2、数字加上分隔符的功能；3、数字加上掩码的功能（123456789  --> 12****89）
  * Created by weikaiwei on 2016/12/1.
  */
-let type = require("./../type"), extend = require("./../extend");
+let type = require("./../type");
 function m() {
   let ext = {
     /**把可转成数字的对象转换成扩展的Number对象
@@ -106,7 +106,7 @@ function m() {
       }
       number = new F(number);
       if (type.isNumber(o)) o = {fixed: o};
-      o = extend({split: 3, char: ",", fixed: 0, prefix: "", fixedMode: 0, force: 1}, o);
+      o = Object.assign({split: 3, char: ",", fixed: 0, prefix: "", fixedMode: 0, force: 1}, o);
       split = o.split, char = o.char, fixed = o.fixed;
       /**小数保留方式。默认（四舍五入）；1（截断）；2（只入不舍）；3（只舍不入）
        * 1、四舍五入和向上取整的保留方式都可能会进位到个位数上，整数部分需要加上进位的数（1）
@@ -138,11 +138,11 @@ function m() {
   function F(a) {
     //先创建一个原始的Number对象实例，然后在实例的基础上添加扩展方法
     let obj = new Number(a);
-    extend(obj, ext);
+    Object.assign(obj, ext);
     return obj;
   }
 
-  extend(F, Number, ext);
+  Object.assign(F, Number, ext);
   return F;
 }
 module.exports = m();
