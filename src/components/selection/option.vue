@@ -49,7 +49,7 @@
        * @return Boolean 匹配成功返回true
        * */
       match(item){
-        return this.state.selection.valueEqual(item[this.valueField], this.state.value)
+        return this.state.selection.eq(item[this.valueField], this.state.value)
       },
       /**设置属性
        * @props Object 匹配成功设置属性值

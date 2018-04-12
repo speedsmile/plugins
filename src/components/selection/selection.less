@@ -90,6 +90,12 @@
       &.expand .icon-drop::after {
         border-bottom-color: @disabled-bg;
       }
+      .selection-area, .list-item, a{
+        cursor: not-allowed;
+      }
+      .selection-item:hover{
+        opacity: 1;
+      }
     }
     .selection-area{
       cursor: pointer;
@@ -169,7 +175,6 @@
       background-color: #f7f7f7;
       border: 1px solid @gray-border;
       border-radius: 3px;
-      cursor: pointer;
       word-break: break-all;
       &:hover {
         opacity: .85;

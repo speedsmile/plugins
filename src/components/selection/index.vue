@@ -1,6 +1,6 @@
 <template>
   <div class="selection"
-       :class="{disabled: mode == 0, expand: status == 'expand', multiple: multiple, single: !multiple }">
+       :class="{disabled: disabled, expand: status == 'expand', multiple: multiple, single: !multiple }">
     <!-- 显示区域，选中的下拉项 -->
     <div class="selection-area" @click="toggle">
       <!-- 选中的下拉选项 -->
@@ -58,9 +58,6 @@
   import "./selection.less";
   import focusPanel from "./focusPanel.vue";
   import SelectionOption from "./option.vue";
-
-  // 配合iview的Form组件的校验框架，需要引入该ForIView模块。不使用iview则不需要引用此模块
-
   import extend from './Extend';
 
   /**把虚拟的dom节点VNode解析成正常的dom结构
@@ -133,15 +130,13 @@
       filterDelay: {type: Number, default: 300},
       clearable: {type: Boolean, default: false},
       // 比较下拉项对象是否相等的方法，默认 ===
-      valueEqual: {
+      eq: {
         type: Function,
         default: (a, b) => {
           return a === b;
         }
       },
-
-      //下拉组件的模式状态：0，禁用；1，正常可编辑（默认）
-      mode: {default: 1},
+      disabled: { type: Boolean, default: false }, // 是否禁用
       model: {type: String, default: "pair"},
       // 是否显示清除
       // 下拉组件销毁时是否把对应的v-model设置成null
@@ -265,7 +260,7 @@
         let selections = this.selectedItems, valueField = this.valueField, models;
         if (this.multiple) {
           //不能重复添加同一个选中项
-          selections.every(i => !this.valueEqual(item[valueField], i[valueField])) && (selections.push(item));
+          selections.every(i => !this.eq(item[valueField], i[valueField])) && (selections.push(item));
           models = this._updateModels();
           this.setChildrenSelected(this.selectedItems, true);
         } else {
@@ -278,7 +273,7 @@
       removeSelection (item) {
         let selections = this.selectedItems, valueField = this.valueField;
         selections.some((i, index) => {
-          if (this.valueEqual(item[valueField], i[valueField])) {
+          if (this.eq(item[valueField], i[valueField])) {
             selections.splice(index, 1);
             return true;
           }
@@ -326,7 +321,7 @@
       },
       // Todo 展开下拉，选中项的对应数据要显示在看得见的地方
       expand () {
-        if (this.mode == 1 && this.status != "expand") {
+        if (!this.disabled && this.status != "expand") {
           this.status = "expand";
           this.$refs.list.expand(1);
           this.$emit("on-open");
@@ -334,7 +329,7 @@
       },
       //状态改为收回状态，下拉的收回状态由下拉对象自己处理
       collapse () {
-        if (this.mode == 1) {
+        if (!this.disabled) {
           if (this.status != "collapse") {
             this.status = "collapse";
             //下拉面板关闭、搜索结果面板关闭后重置输入内容和结果列表
@@ -346,7 +341,7 @@
         }
       },
       toggle () {
-        if (this.mode == 1) {
+        if (!this.disabled) {
           this.status == "collapse" ? this.expand() : this.collapse();
         }
       },
@@ -360,7 +355,7 @@
       },
       isSelected (item) {
         let valueField = this.valueField;
-        return this.selectedItems && this.selectedItems.some(selection => this.valueEqual(selection[valueField], item[valueField]));
+        return this.selectedItems && this.selectedItems.some(selection => this.eq(selection[valueField], item[valueField]));
       },
       // 本地数据过滤的默认方法
       localFilter(){
@@ -436,10 +431,11 @@
       _clearModel(){
         this.$emit("on-model-change", null, this);
       },
-      /**判断新旧数据在数据的角度上是否相等。
+      /**判断新旧数据在数据层面上是否相等。新旧数据的结构都是{labelField, valueField}
        * 比如在程序上，[1]不等于[1]；但在数据上视为相等。
        * 使用场景：变量发生变化执行了数据加工方法后重新使用新的变量改变原始变量，会再次触发变量修改事件
        *   进行数据上的相等判断，防止陷入死循环
+       *
        * */
       _eq(newData, oldData){
         let eq = true;
@@ -448,7 +444,7 @@
         if (newData.length != oldData.length) eq = false;
         else {
           for (let i in newData) {
-            if (newData[i][this.valueField] != oldData[i][this.valueField]) {
+            if (!this.eq(newData[i][this.valueField], oldData[i][this.valueField])) {
               eq = false;
               break;
             }
@@ -556,7 +552,7 @@
         if (!hasValue && !hasLabel) { // 跳过空值
           return null;
         } else if (hasValue) { // 有value，尝试着从下拉中查找和value匹配得上的label，没有则使用指定的label
-          items.find(n => (this.valueEqual(n[valueField], value)) && (label = n[labelField], true));
+          items.some(n => (this.eq(n[valueField], value)) && (label = n[labelField], true));
         }
         // 剩下只有label的情况。选中项中显示label，value空着，多选状态下的value数组也空着
         return {[valueField]: value, [labelField]: label}

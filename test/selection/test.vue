@@ -13,7 +13,7 @@
         <selection placeholder="请选择" v-model="complexModel"
                    :filter-method="filter" clearable clear-model
                    multiple
-                   :value-equal="function(a,b){return a[0] === b[0]}"
+                   :eq="function(a,b){return a[0] === b[0]}"
                    @on-change="log('change')" @on-destroyed="log(this)"
         >
           <selection-option v-for="item,i in complex" :value="item" :key="i" :label="item[1]"></selection-option>

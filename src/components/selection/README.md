@@ -19,12 +19,13 @@
 | default-index | Number | 默认选中下拉的第几个选项，索引从0开始 | 无 |
 | placeholder | String | 没有选中项时的提示文字 | 无 |
 | multiple | Boolean | 是否可以多选 | false |
+| disabled | Boolean | 是否禁用 | false |
 | filterable | Boolean | 是否可以搜索 | true |
 | filter-method | Function(keywords, callback) | 开启搜索功能后，自定义搜索方法。把搜索结果传入callback参数中，格式和value一致 | 内置根据输入关键字过滤下拉项的方法 |
 | filter-placeholder | String | 搜索框显示的文字提示 | 请输入关键字 |
 | filter-delay | Number（毫秒） | 搜索动作太过频繁，设置延时时间 | 300 |
 | clearable | Boolean | 单选模式下是否可以清空下拉选项<br>多选模式下在最后出现一个叉叉一次性清除所有选中项 | false |
-| value-equal | Function(a,b):Boolean | 比较下拉控件的value是否相等，默认采用 === 的方式。<br>对于复杂的value格式，比如{value: 1}和{value: 1}，[1]和[1]，在程序上是不相等的，但在业务逻辑上可能视为相等。需要重写判断的方法 | function(a,b){return a===b} |
+| eq | Function(a,b):Boolean | 比较下拉控件的value是否相等，默认采用 === 的方式。<br>对于复杂的value格式，比如{value: 1}和{value: 1}，[1]和[1]，在程序上是不相等的，但在业务逻辑上可能视为相等。需要重写判断的方法 | function(a,b){return a===b} |
 
 ## 事件
 | 事件名 | 说明 | 回调参数 |
