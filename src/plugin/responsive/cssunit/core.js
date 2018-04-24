@@ -12,8 +12,8 @@ let fun = (value, unit) => value + unit;
  * rule: 统一的转换规则，没有指定转换规则的A单位都使用这个规则，function(单位值:Number)，返回转换后的结果，带上单位。不指定原样返回
  * split: 分隔符。默认/[,|\s]+/
  * */
-function Rule(){
-  this.initRules(...arguments)
+function Rule(...args){
+  this.initRules(...args)
 }
 Rule.prototype = {
   // 初始化规则
@@ -55,5 +55,5 @@ Rule.prototype = {
     return cssText
   }
 };
-// new Rule({source: "px|pt|em", rule: function(value, unit){return value / 10 + unit}}).parse("border:12.23px solid #fff;font-size:15pt;font-size:15em;")
+// example: new Rule({source: "px|pt|em", rule: function(value, unit){return value / 10 + unit}}).parse("border:12.23px solid #fff;font-size:15pt;font-size:15em;")
 module.exports = Rule;

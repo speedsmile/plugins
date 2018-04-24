@@ -1,4 +1,4 @@
-/**作为postcss的插件，依赖postcss xinzeng
+/**作为postcss的插件，依赖postcss
  * Created by weikaiwei on 2017/12/15.
  */
 let postcss = require('postcss'), Cssunit = require('./core');
