@@ -1,0 +1,73 @@
+@loading-starts-color: #2d8cf0;
+.loading-containers{
+  position: absolute;
+  z-index: 999;
+  .loading{
+    &:after{
+      content: "";
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, .2);
+    }
+    & ~ .loading{
+      display: none;
+    }
+  }
+}
+.loading-stars {
+  position: fixed;
+  z-index: 1;
+  top: 50%;
+  left: 50%;
+  margin: -30px;
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  fill: @loading-starts-color;
+  .loader-star {
+    position: static;
+    width: 60px;
+    height: 60px;
+    transform: scale(0.7);
+    animation: loader-2-star 1.5s ease alternate infinite;
+  }
+  .loader-circles {
+    position: absolute;
+    left: calc(50% - 4px);
+    top: calc(50% - 4px);
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: @loading-starts-color;
+    transition: all 1s ease;
+    animation: loader-2-circles 1.5s ease-in-out alternate infinite;
+  }
+}
+
+@keyframes loader-2-circles {
+  0% {
+    box-shadow: 0 0 0 @loading-starts-color;
+    opacity: 1;
+    transform: rotate(0deg);
+  }
+  50% {
+    box-shadow: 24px -22px @loading-starts-color, 30px -15px 0 -3px @loading-starts-color, 31px 0px @loading-starts-color, 29px 9px 0 -3px @loading-starts-color, 24px 23px @loading-starts-color, 17px 30px 0 -3px @loading-starts-color, 0px 33px @loading-starts-color, -10px 28px 0 -3px @loading-starts-color, -24px 22px @loading-starts-color, -29px 14px 0 -3px @loading-starts-color, -31px -3px @loading-starts-color, -30px -11px 0 -3px @loading-starts-color, -20px -25px @loading-starts-color, -12px -30px 0 -3px @loading-starts-color, 5px -29px @loading-starts-color, 13px -25px 0 -3px @loading-starts-color;
+    transform: rotate(180deg);
+  }
+  100% {
+    opacity: 0;
+    transform: rotate(360deg);
+    box-shadow: 25px -22px @loading-starts-color, 15px -22px 0 -3px #000, 31px 2px @loading-starts-color, 21px 2px 0 -3px #000, 23px 25px @loading-starts-color, 13px 25px 0 -3px #000, 0px 33px @loading-starts-color, -10px 33px 0 -3px #000, -26px 24px @loading-starts-color, -19px 17px 0 -3px #000, -32px 0px @loading-starts-color, -23px 0px 0 -3px #000, -25px -23px @loading-starts-color, -16px -23px 0 -3px #000, 0px -31px @loading-starts-color, -2px -23px 0 -3px #000;
+  }
+}
+@keyframes loader-2-star {
+  0% {
+    transform: scale(0) rotate(0deg);
+  }
+  100% {
+    transform: scale(0.7) rotate(360deg);
+  }
+}
