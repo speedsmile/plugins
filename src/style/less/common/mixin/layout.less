@@ -10,7 +10,33 @@
            3、最后一个块布局容器（.hgroup、.vgroup、.block）没有底边距
 */
 .m-group(@hgap, @vgap: @hgap){
+  // 所有的group都有底部边距
+  .hgroup, .vgroup, .flex-hgroup{
+    &.group-block, .group-block & {
+      margin-bottom: @vgap;
+    }
+    .group-block{
+      margin-bottom: @vgap;
+    }
+    &.group-noblock, .group-noblock & {
+      margin-bottom: 0;
+    }
+  }
+  ._m-clearfix(){
+    &:after {
+      content: " ";
+      display: block;
+      width: 0;
+      height: 0;
+      line-height: 0;
+      clear: both;
+    }
+  }
+  // 块布局，并且有底部边距
   ._m-block_(){
+    display: block;
+  }
+  ._m-block_(@vgap){
     display: block;
     margin-bottom: @vgap;
   }
@@ -34,7 +60,9 @@
   .hgroup{
     ._m-block_();
     // 子元素默认都是行布局
+    //  ._m-clearfix();
     & > *{
+      //float: left;
       ._m-inline_();
     }
     .block{
@@ -44,7 +72,7 @@
   .vgroup{
     ._m-block_();
     & > *{
-      ._m-block_();
+      ._m-block_(@vgap);
       &:last-child{
         margin-bottom: 0;
       }
@@ -80,6 +108,9 @@
     .pull-right{
       align-items: flex-end;
     }
+  }
+  .blockgap{
+
   }
   ._m-nohgap_(@name){
     .@{name}, .@{name} > *, .@{name}-self, .@{name}-sub > *{
