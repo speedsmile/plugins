@@ -4,8 +4,8 @@
 </template>
 <script>
 import Vue from "vue";
-import "@/components/treeMenu/style.less";
-import TreeMenu from "@/components/treeMenu";
+import "@/components/tree-menu/style.less";
+import TreeMenu from "@/components/tree-menu";
 // 格式化菜单列表数据。支持扁平化和嵌套混合模式的数据
 function routerList(menuList) {
   var keyField = "menuId", parentField = "parentId", subField = "list", urlField = "url";

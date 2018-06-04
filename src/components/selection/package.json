@@ -1,6 +1,6 @@
-{
-  "name": "selection",
-  "version": "1.0.0",
+﻿{
+  "name": "adv-selection",
+  "version": "0.0.1",
   "main": "index.vue",
   "description": "下拉组件",
   "dependencies": {

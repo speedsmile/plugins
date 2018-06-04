@@ -1,0 +1,20 @@
+@import (reference) "mixins";
+@import (reference) "tree-menu-mixins";
+
+.adv-tree-menu {
+  .m-adv-tree();
+  .m-border-line();
+  .tree-item{
+    padding: 14px 10px;
+  }
+  .tree-item:hover {
+    .m-adv-tree.m-opened();
+  }
+  .leaf-node:hover > .tree-item {
+    .m-adv-tree.m-selected();
+  }
+  .arrow{
+    left: initial;
+    right: 5px;
+  }
+}

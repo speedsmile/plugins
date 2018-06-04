@@ -1,0 +1,65 @@
+@import (reference) "style/vars";
+//@import (reference) "./theme/mixins";
+@import "style/tree-menu";
+ul{
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.adv-tree{
+  font-size: @font-size;
+  .tree-item{
+    padding: 5px 10px;
+    cursor: pointer;
+    &:hover{
+      .m-opened;
+    }
+    .icon {
+      margin-right:8px;
+    }
+  }
+  .tree-node{
+    color: @text-color;
+  }
+  .tree-item{
+    position: relative;
+  }
+  .leaf-node{
+    &:hover, &.select-node{
+      >.tree-item{
+        .m-selected;
+      }
+    }
+  }
+  .open-node{
+    >.tree-item{
+      .m-opened;
+      .node-arrow{
+        transform: rotate(180deg);
+      }
+    }
+  }
+  // 节点展开收起的箭头
+  .node-arrow{
+    position: absolute;
+    top: 50%;
+    right: 0;
+    margin-top: -4px;
+    width: 0;
+    height: 0;
+    border-style: solid;
+    border-color: @text-color transparent transparent;
+    border-width: 6px 5px 0;
+    transition: border-color .2s ease-in-out;
+  }
+  // 动画过渡
+  .node-text, .icon, .node-arrow{
+    transition: all .2s ease-in-out;
+  }
+  .m-indent;
+  .m-border-line;
+  // 树节点展开/关闭高度变化的动画
+  .collapse-transition{
+    transition: height .2s ease-in-out;
+  }
+}

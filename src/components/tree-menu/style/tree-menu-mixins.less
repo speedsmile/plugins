@@ -1,0 +1,24 @@
+@bg: #348fe2;
+@text-color: #a8acb1; // 基本文字颜色
+@selected-text-color: #fff; // 选中节点的文字颜色
+@selected-icon-color: @bg; // 选中节点的图标颜色
+@selected-bg: transparent; // 选中节点的背景颜色
+@open-text-color: @selected-text-color; // 展开节点的文字颜色
+@open-bg: @bg; // 展开节点的背景颜色
+@open-arrow-color: #fff; // 展开节点的箭头图标颜色
+@hsplitline-color: #54606a; // 菜单水平分割线的颜色
+
+// 树菜单的分割线
+.m-border-line(){
+  .tree-item{
+    position: relative;
+    &:after{
+      content: "";
+      position: absolute;
+      left: 0;
+      bottom: 0;
+      width: 100%;
+      border-bottom: 1px solid @hsplitline-color;
+    }
+  }
+}

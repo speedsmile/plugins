@@ -1,0 +1,91 @@
+@import (reference) "vars";
+.m-adv-tree(){
+  font-size: @font-size;
+  line-height: 1.2;
+  ul{
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  .tree-item{
+    cursor: pointer;
+    .icon {
+      margin-right:8px;
+    }
+  }
+  .tree-node{
+    color: @text-color;
+  }
+  .tree-item{
+    position: relative;
+  }
+  .tree-item:hover, .select-node > .tree-item{
+    >.tree-content{
+      .m-selected;
+    }
+  }
+  .open-node{
+    >.tree-item{
+      .m-opened;
+      .arrow{
+        transform: rotate(180deg);
+      }
+    }
+  }
+  // 节点展开收起的箭头
+  .arrow{
+    position: absolute;
+    top: 50%;
+    left: 0;
+    margin-top: -6px;
+    width: 18px;
+    height: 12px;
+    padding: 3px;
+    &:before{
+      content: "";
+      display: inline-block;
+      width: 0;
+      height: 0;
+      border-style: solid;
+      border-color: @text-color transparent transparent;
+      border-width: 6px 5px 0;
+      vertical-align: top;
+      transition: border-color .2s ease-in-out;
+    }
+  }
+  // 动画过渡
+  .node-text, .icon, .arrow{
+    transition: all .2s ease-in-out;
+  }
+  .m-indent;
+  // 树节点展开/关闭高度变化的动画
+  .collapse-transition{
+    transition: height .2s ease-in-out;
+  }
+  // 节点选中的样式
+  .m-selected(){
+    color: @selected-text-color;
+    background-color: @selected-bg;
+    .icon{
+      color: @selected-icon-color;
+    }
+  }
+  // 节点展开的样式
+  .m-opened(){
+    color: @open-text-color;
+    background-color: @open-bg;
+    .arrow:before{
+      border-top-color: @open-arrow-color;
+    }
+  }
+
+  /* 递归创建N级嵌套的树菜单的缩进 */
+  .m-indent(@l:0, @n: 6)when(@l < @n){
+    .tree-sub {
+      .tree-content{
+        margin-left: @sub-indent * (@l + 1);
+      }
+      .m-indent(@l+1)
+    }
+  }
+}
