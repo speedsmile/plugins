@@ -76,7 +76,8 @@ devMiddleware.waitUntilValid(() => {
   console.log('> Listening at ' + uri + '\n')
   // when env is testing, don't need open it
   if (autoOpenBrowser && process.env.NODE_ENV !== 'testing') {
-    opn(uri + `/${pName}/selection/selection.html`, {app: ["chrome"]})
+    // opn(uri + `/${pName}/selection/selection.html`, {app: ["chrome"]})
+    opn(uri + `/${pName}/vForm/vForm.html`, {app: ["chrome"]})
   }
   _resolve()
 })

@@ -1,0 +1,5 @@
+{
+  "name": "VForm",
+  "version": "0.0.1",
+  "description": "表单工具（包含表单提交工具，表单校验工具），依赖jQuery或者zepto，提供AMD、CMD的方式"
+}

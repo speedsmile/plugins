@@ -286,7 +286,7 @@
                      * @param $target 被校验的dom元素
                      * 返回值：校验成功返回true，失败返回false
                      * */
-                    validate: function(value, fieldName, ruleNames, rules, _getData, $target){
+                    validate: function(value, fieldName, ruleNames, rules, _getData){
                         var rule, ruleName, _this, $errorTipTarget, tipName, tipText, r;
                         rules || (rules = {});
                         type.isArray(ruleNames) || (ruleNames = this.serializeRule(ruleNames));
