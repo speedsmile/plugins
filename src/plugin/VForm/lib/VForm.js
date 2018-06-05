@@ -12,7 +12,8 @@ import methods from "./API";
  * */
 export default function (o = {}) {
   let $ = o.$ || window.$ || window.jQuery || window.Zepto,
-    type = $;
+    type = $,
+    onE = o.on || {};
   type.isString = function (o) {
     return typeof o == "string";
   };
@@ -82,7 +83,6 @@ export default function (o = {}) {
           return v === "" || /^-\d+$/.test(v) && Number(v) <= 0;
         }
       },
-      errorTarget: null,//数组。校验的时候存放所有校验失败的dom元素
       /**让浏览器定位到指定的元素上
        * @param e 被定位的元素
        * number类型，获取与fields中声明的顺序与指定索引相同的元素；
@@ -130,9 +130,9 @@ export default function (o = {}) {
        * @param names String|[String] 被校验的字段名称
        * @return Promise 校验通过进入then，失败进入catch
        * */
-      validate: function (names) {
+      validate: function (names, ruleName) {
         let allFields = this.fields, fields = [], vForm = this, formData = {},
-          errorTarget = [];
+          $errorTarget = $(), errorFields = [];
         if (names) {
           type.isArray(names) || (names = [names]);
           names.forEach(name => {
@@ -147,7 +147,7 @@ export default function (o = {}) {
             let fieldName = field.name,
               $target = vForm.getElement(field.hasOwnProperty("for") ? field.for : fieldName),
               values = vForm.getElementData(field),
-              vResult = methods.validate.call(vForm, values, field),
+              vResult = methods.validate.call(vForm, values, field, ruleName),
               $errorTipTarget = vForm.getElementTip(fieldName);
             // 显示/隐藏错误提示
             //校验通过，包装字段值
@@ -167,15 +167,26 @@ export default function (o = {}) {
             } else {
               vResult !== undefined && $errorTipTarget.html(vResult);
               vForm.toggleTip($errorTipTarget, true);
-              errorTarget.push($target[0]);
+              errorFields.push(fieldName);
+              $errorTarget = $errorTarget.add($target);
             }
           });
           // 指定的字段全部校验通过，执行resolve；否则执行reject
-          if (!errorTarget.length) {
-            resolve(formData);
+          var scope = {vForm};
+          if (!$errorTarget.length) {
+            scope.formData = formData;
+            resolve(scope);
           } else {
-            reject(errorTarget);
+            scope.errorFields = errorFields;
+            scope.$errorTarget = $errorTarget;
+            reject(scope);
           }
+        }).then(function(scope){
+          onE.valid && onE.valid(scope);
+          return scope
+        }).catch(function(scope){
+          onE.invalid && onE.invalid(scope);
+          return scope
         });
       }
     },
@@ -260,7 +271,7 @@ export default function (o = {}) {
        * @param show Boolean true：显示；false：隐藏；默认：toggle（显示->隐藏，隐藏->显示）
        * */
       toggleTip($el, show) {
-        $el[show ? "removeClass" : "addClass"]("hide");
+        $el[show ? "show" : "hide"]();
       },
       /**判断元素是否禁用的方法
        * */

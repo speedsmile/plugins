@@ -36,11 +36,12 @@
       vForm = window.vFrom = new VForm({
         fields: [
           {name: "name"},
-          {name: "pwd", rules: {
-            v: function(v){
-              return /\d{3,}/.test(v);
-            }
-          }},
+          {
+            name: "pwd",
+            rule: [
+              {}
+            ]
+          },
         ],
       });
     }

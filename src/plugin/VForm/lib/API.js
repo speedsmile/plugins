@@ -35,13 +35,11 @@ let methods = {
     return arrRule;
   },
   /**功能：校验一个元素的值是否满足其校验规则
-   * @param fieldName 字段名称
-   * @param value 被校验的值
-   * @param ruleNames 校验规则的key
-   * @param rules 私有的校验规则实现
+   * @param value any 被校验的值
+   * @param field Object 对象
    * 返回值：校验成功返回true，失败返回false
    * */
-  validate (value, field) {
+  validate (value, field, vName) {
   var type = this.type, rule, ruleName, $errorTipTarget, r,
     fieldName = field.name,
     $target = this.getElement(field.hasOwnProperty("for") ? field.for : fieldName),
@@ -52,36 +50,39 @@ let methods = {
      * ps:被禁用（和被排除）的元素不用获取它的值，也不用校验（之前的错误提示也要清除）
      * */
     ruleNames = methods.serializeRule.call(this, field.hasOwnProperty("rule") ? field.rule : $target.data("rule")),
-    rules = field.rules || {};
+    // 私有的校验规则实现
+    rules = field.rules || {},
+    outParam = {vForm: this, target: $target[0], field};
   for (var i = 0, l = ruleNames.length; i < l; i++) {
     r = true;
     ruleName = ruleNames[i];
     //如果规则本身是个处理器（匿名处理器），按照处理器的规则进行校验
-    if (type.isFunction(ruleName)) {
-      rule = ruleName;
-      r = rule.call(this, value, fieldName);
-    } else {
+    if (type.String(ruleName)) {
       //根据校验器的名称获取对应的校验规则，优先使用私有校验器
       rule = rules[ruleName] || this.rules[ruleName];
-      if (rule) {
-        /**自定义校验规则
-         * @return Object {
-                             *      result: 校验结果 true: 成功, false: 失败,
-                             *      tip: 触发的tip提示配置（1个校验规则可能有多中提示结果，根据返回的关键字找到最合适的配置提示）
-                             *      tipMsg: 具体的提示信息，忽略tip
-                             * }
-         * @return Boolean（非Object） 校验成功/失败
-         * */
-        if (typeof rule == "function") {
-          r = rule.call(this, value, fieldName);
-        } else if (rule instanceof RegExp) {
-          r = rule.test(value);
-        }
+    }
+    if (type.isPlainObject(rule)){ // 纯对象格式{ name: "校验器的名称，多个校验器的时候可以指定校验某种。默认全部校验" }
+      // 和指定校验规则名称相等的校验器执行，不相等跳过
+      if(vName !== undefined && vName === rule.name){
+        r = rule.validate.call(outParam, value);
       }
+    }
+    /**自定义校验规则
+     * @return Object {
+                           *      result: 校验结果 true: 成功, false: 失败,
+                           *      tip: 触发的tip提示配置（1个校验规则可能有多中提示结果，根据返回的关键字找到最合适的配置提示）
+                           *      message: 具体的提示信息，忽略tip
+                           * }
+     * @return Boolean（非Object） 校验成功/失败
+     * */
+    else if (type.isFunction(rule)) {
+      r = rule.call(outParam, value);
+    } else if (rule instanceof RegExp) {
+      r = rule.test(value);
     }
     if (!r) {
       $errorTipTarget = this.getElementTip(fieldName);
-      return this.getTipMessage($errorTipTarget, ruleName);
+      return outParam.hasOwnProperty("message") ? outParam.message : this.getTipMessage($errorTipTarget, ruleName);
     }
   }
   return true;

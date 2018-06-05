@@ -13,8 +13,12 @@ function resolve(dir) {
 }
 console.log(utils.assetsPath('img/[name].[hash:7].[ext]'))
 var entry = Entry("test/*/*.js", {base: "test", template: {output: resolve("dist/") + require("../package.json").name}});
+
 module.exports = {
-  entry: entry.js,
+  // entry: entry.js,
+  entry: {
+    "VForm.cmd": "./src/plugin/VForm/VForm.cmd"
+  },
   output: {
     path: config.build.assetsRoot,
     filename: '[name].js',
@@ -78,7 +82,7 @@ module.exports = {
     ]
   },
   plugins: [
-    ...entry.html.map(html => new HtmlWebpackPlugin(html))
+    //...entry.html.map(html => new HtmlWebpackPlugin(html))
     // new webpack.ProvidePlugin({
     //   $: "jquery",
     //   jQuery: "jquery"
