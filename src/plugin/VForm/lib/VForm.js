@@ -7,16 +7,16 @@
  * 附带一个form提交的方法：有些情况下不能使用ajax方式提交数据
  * Created by weikaiwei on 2016/10/27.
  */
+/**TODO 每个field配置一个成功和失败的回调，用于捕获单个field经过完全校验后的动作
+ * */
 import methods from "./API";
+import type from "@/plugin/util/type";
+import Iterator from "./Iterator";
 /**支持使用函数调用的方式和new方式来生成一个VForm对象
  * */
 export default function (o = {}) {
   let $ = o.$ || window.$ || window.jQuery || window.Zepto,
-    type = $,
     onE = o.on || {};
-  type.isString = function (o) {
-    return typeof o == "string";
-  };
   let vForm = {
       $,
       type,
@@ -51,11 +51,11 @@ export default function (o = {}) {
        * */
       rules: {
         // 正则表达式不能校验出null和undefined
-        require: function (v) {
-          return v != null && /\S+/.test(v.toString());
+        require: function ({value}) {
+          return value != null && /\S+/.test(value.toString());
         },
         text: /^[\u4e00-\u9fa5\w]+$/,
-
+        
         //所有校验器验证空字符串的时候都返回true，表示可以没有值，如果有的话就必须正确。必需有值请配合使用require规则。
         //数字，正负实数和0
         number: /^([+-]?\d+?(\.\d*)?)?$/,
@@ -63,24 +63,24 @@ export default function (o = {}) {
         //负数（negative）nnumber
         //非负数，无符号实数（0和正数）unumber
         //非正数（0和负数）mnumber
-
+        
         //整数
         int: /^([+-]?\d+)?$/,
         //正整数（positive integer）
-        pint: function (v) {
-          return v === "" || /^\d+$/.test(v) && Number(v) > 0;
+        pint: function ({value}) {
+          return value === "" || /^\d+$/.test(value) && Number(value) > 0;
         },
         //负整数（negative integer）
-        nint: function (v) {
-          return v === "" || /^-\d+$/.test(v) && Number(v) < 0;
+        nint: function ({value}) {
+          return value === "" || /^-\d+$/.test(value) && Number(value) < 0;
         },
         //非负整数，无符号整数（0和正整数）
-        uint: function (v) {
-          return v === "" || /^\d+$/.test(v) && Number(v) >= 0;
+        uint: function ({value}) {
+          return value === "" || /^\d+$/.test(value) && Number(value) >= 0;
         },
         //非正整数（0和负整数）
-        mint: function (v) {
-          return v === "" || /^-\d+$/.test(v) && Number(v) <= 0;
+        mint: function ({value}) {
+          return value === "" || /^-\d+$/.test(value) && Number(value) <= 0;
         }
       },
       /**让浏览器定位到指定的元素上
@@ -132,7 +132,7 @@ export default function (o = {}) {
        * */
       validate: function (names, ruleName) {
         let allFields = this.fields, fields = [], vForm = this, formData = {},
-          $errorTarget = $(), errorFields = [];
+          invalidFields = [], validFields = [];
         if (names) {
           type.isArray(names) || (names = [names]);
           names.forEach(name => {
@@ -141,52 +141,72 @@ export default function (o = {}) {
         } else {
           fields = allFields;
         }
-        return new Promise((resolve, reject) => {
-          //基本的表单元素使用循环一边获取它们的值一边校验。只要有一个校验错误，整个校验都是不通过的。按照需求需要继续把所有的错误都交验出来
-          fields.forEach(function (field) {
-            let fieldName = field.name,
-              $target = vForm.getElement(field.hasOwnProperty("for") ? field.for : fieldName),
-              values = vForm.getElementData(field),
-              vResult = methods.validate.call(vForm, values, field, ruleName),
-              $errorTipTarget = vForm.getElementTip(fieldName);
-            // 显示/隐藏错误提示
-            //校验通过，包装字段值
-            if (vResult === true) {
-              vForm.toggleTip($errorTipTarget, false);
-              /**如果配置了字段包装器wrap，使用包装器对值进行处理，否则就使用默认的方式处理
-               * 如果包装器没有返回结果，这个字段的值将不纳入表单获取的数据中
-               * @param value 当前字段的值
-               * @param data 当前所有字段的结果集对象
-               * @return 最后经过包装器处理后的最终结果
-               * */
-              if (type.isFunction(field.wrap)) {
-                let outParam = {vForm: this, target: $target[0], field};
-                values = field.wrap.call(outParam, values);
-              }
-              formData[fieldName] = values;
-            } else {
-              vResult !== undefined && $errorTipTarget.html(vResult);
-              vForm.toggleTip($errorTipTarget, true);
-              errorFields.push(fieldName);
-              $errorTarget = $errorTarget.add($target);
-            }
-          });
-          // 指定的字段全部校验通过，执行resolve；否则执行reject
-          var scope = {vForm};
-          if (!$errorTarget.length) {
-            scope.formData = formData;
-            resolve(scope);
-          } else {
-            scope.errorFields = errorFields;
-            scope.$errorTarget = $errorTarget;
-            reject(scope);
+        function valid(vForm, value, field, target){
+          let fieldName = field.name;
+          //校验通过，包装字段值
+          vForm.toggleTip(fieldName, false);
+          /**如果配置了字段包装器wrap，使用包装器对值进行处理，否则就使用默认的方式处理
+           * 如果包装器没有返回结果，这个字段的值将不纳入表单获取的数据中
+           * @param value 当前字段的值
+           * @param data 当前所有字段的结果集对象
+           * @return 最后经过包装器处理后的最终结果
+           * */
+          if (type.isFunction(field.wrap)) {
+            let outParam = {vForm, value, field, target};
+            value = field.wrap(outParam);
           }
-        }).then(function(scope){
+          formData[fieldName] = value;
+          validFields.push(fieldName);
+        }
+        function invalid(vForm, field, msg){
+          let fieldName = field.name;
+          vForm.toggleTip(fieldName, true, msg);
+          invalidFields.push(fieldName);
+        }
+        var scope = {vForm};
+        var iter = new Iterator(fields);
+        //基本的表单元素使用循环一边获取它们的值一边校验。只要有一个校验错误，整个校验都是不通过的。默认把所有字段的错误都校验出来
+        return new Promise(function loop(resolve, reject){
+            if(iter.hasNext()){
+              let field = iter.next(), fieldName = field.name,
+                $target = vForm.getElement(field.hasOwnProperty("for") ? field.for : fieldName),
+                value = vForm.getElementData(field),
+                vResult = true;
+              if(!vForm.isDisabled($target)){
+                vResult = methods.validate.call(vForm, value, field, ruleName);
+              }
+              if(vResult instanceof Promise){
+                vResult.then(function () {
+                  valid(vForm, value, field, $target[0]);
+                  loop(resolve, reject);
+                }).catch(function (msg) {
+                  invalid(vForm, field, msg);
+                  loop(resolve, reject);
+                });
+              }else if(vResult === true){
+                valid(vForm, value, field, $target[0]);
+                loop(resolve, reject);
+              }else{
+                invalid(vForm, field, vResult);
+                loop(resolve, reject);
+              }
+            } else{
+              // 指定的字段全部校验通过，执行resolve；否则执行reject
+              if (!invalidFields.length) {
+                scope.formData = formData;
+                scope.validFields = validFields;
+                resolve(scope);
+              } else {
+                scope.invalidFields = invalidFields;
+                reject(scope);
+              }
+            }
+        }).then(function (scope) {
           onE.valid && onE.valid(scope);
           return scope
-        }).catch(function(scope){
+        }).catch(function (scope) {
           onE.invalid && onE.invalid(scope);
-          return scope
+          return Promise.reject(scope)
         });
       }
     },
@@ -234,6 +254,7 @@ export default function (o = {}) {
        * @param field Object 指定的元素的field配置项
        * */
       getElementData(field) {
+        type.isString(field) && (field = {name: field});
         //基本的表单元素使用循环一边获取它们的值一边校验。只要有一个校验错误，整个校验都是不通过的。按照需求需要继续把所有的错误都交验出来
         let vForm = this, fieldName = field.name, values, get = field.get || field.as,
           $target = vForm.getElement(field.hasOwnProperty("for") ? field.for : fieldName),
@@ -267,11 +288,19 @@ export default function (o = {}) {
         return values !== undefined ? vForm.dataConvert(values, field.type) : values;
       },
       /**显示/隐藏错误提示的方法
-       * @param $el jQueryObject $(dom)
+       * @param $el jQueryObject|String
        * @param show Boolean true：显示；false：隐藏；默认：toggle（显示->隐藏，隐藏->显示）
+       * @param text String 显示错误提示时指定提示内容
        * */
-      toggleTip($el, show) {
+      toggleTip($el, show, text) {
+        ($el instanceof $) || ($el = this.getElementTip($el));
+        if (text !== undefined) {
+          $el.html(text);
+        }
         $el[show ? "show" : "hide"]();
+      },
+      isInvalid(name){
+      
       },
       /**判断元素是否禁用的方法
        * */

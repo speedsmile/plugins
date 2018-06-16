@@ -6,6 +6,9 @@ module.exports = {
   objectString: function(obj){
     return this._toString.call(obj)
   },
+  is: function(a, b){
+    return a instanceof b;
+  },
   isPlainObject: function (obj) {
     return this._toString.call(obj) == '[object Object]';
   },
@@ -54,5 +57,8 @@ module.exports = {
   // 不是日期，或者不是合法日期
   isInvalidDate: function (obj){
     return !this.isDate(obj) || this.objectString() == 'Invalid Date';
+  },
+  wrapArray: function(a){
+    return this.isArray(a) ? a : [a];
   }
 };

@@ -1,6 +1,8 @@
 /**
  * Created by weikaiwei on 2018/6/4.
  */
+import Iterator from "./Iterator";
+import type from "@/plugin/util/type";
 let methods = {
   /**把支持的各种规则声明结构转换成统一的结构
    * 支持：
@@ -11,7 +13,8 @@ let methods = {
    * 不符合格式的规则将被忽略
    * */
   serializeRule() {
-    var type = this.type, arrRule = [];
+    var arrRule = [];
+    
     function _serialize(rule, arrRule) {
       //数组类型的规则，迭代分解每一个成员的规则
       if (type.isArray(rule)) {
@@ -24,11 +27,11 @@ let methods = {
         rule.split(/[\s;]+/).forEach(function (rule) {
           arrRule.push(rule)
         });
-      } else if (type.isFunction(rule)) {
+      } else {
         arrRule.push(rule);
       }
     }
-
+    
     for (var i = 0, l = arguments.length; i < l; i++) {
       _serialize(arguments[i], arrRule);
     }
@@ -39,32 +42,70 @@ let methods = {
    * @param field Object 对象
    * 返回值：校验成功返回true，失败返回false
    * */
-  validate (value, field, vName) {
-  var type = this.type, rule, ruleName, $errorTipTarget, r,
-    fieldName = field.name,
-    $target = this.getElement(field.hasOwnProperty("for") ? field.for : fieldName),
-    /**字段值校验
-     * 1、校验规则声明：允许在html结构中声明data-rule，同时也可以在js的字段定义中声明“rule”。2者都定义以js中定义的为准。
-     * 2、默认使用全局校验器，如果定义了私有校验器，优先使用私有校验器。
-     * ps:校验表单元素的内容是否满足自身声明的规则 data-rule的声明，data-rule可能是多个规则，可用分号或空格分隔，按照顺序依次校验
-     * ps:被禁用（和被排除）的元素不用获取它的值，也不用校验（之前的错误提示也要清除）
-     * */
-    ruleNames = methods.serializeRule.call(this, field.hasOwnProperty("rule") ? field.rule : $target.data("rule")),
-    // 私有的校验规则实现
-    rules = field.rules || {},
-    outParam = {vForm: this, target: $target[0], field};
-  for (var i = 0, l = ruleNames.length; i < l; i++) {
-    r = true;
-    ruleName = ruleNames[i];
+  validate(value, field, vName) {
+    var vForm = this, rule, $errorTipTarget, r,
+      fieldName = field.name,
+      $target = this.getElement(field.hasOwnProperty("for") ? field.for : fieldName),
+      /**字段值校验
+       * 1、校验规则声明：允许在html结构中声明data-rule，同时也可以在js的字段定义中声明“rule”。2者都定义以js中定义的为准。
+       * 2、默认使用全局校验器，如果定义了私有校验器，优先使用私有校验器。
+       * ps:校验表单元素的内容是否满足自身声明的规则 data-rule的声明，data-rule可能是多个规则，可用分号或空格分隔，按照顺序依次校验
+       * ps:被禁用（和被排除）的元素不用获取它的值，也不用校验（之前的错误提示也要清除）
+       * */
+      ruleNames = methods.serializeRule.call(this, field.hasOwnProperty("rule") ? field.rule : $target.data("rule")),
+      // 私有的校验规则实现
+      rules = field.rules || {},
+      outParam = {vForm, target: $target[0], field, value};
+    // 设计一个Promise链式执行器
+    var iter = new Iterator(ruleNames);
+    return new Promise(function loop(resolve, reject){
+      if(iter.hasNext()){
+        var ruleName = iter.next(), r = true;
+        if (type.isPlainObject(ruleName)) {
+          rule = ruleName;
+          rule.validator = methods.formatRule.call(vForm, rule.validator, rules, vForm.rules);
+        } else {
+          rule = {validator: methods.formatRule.call(vForm, ruleName, rules, vForm.rules)};
+        }
+        // 纯对象格式{ name: "校验器的名称，多个校验器的时候可以指定校验某种。默认全部校验" }
+        /**1、不指定校验名称，所有校验器依次执行
+         * 2、指定了单个校验名称，和名称相等的校验器执行，不相等的跳过
+         * */
+        if (!vName || methods.contains(vName, rule.trigger)) {
+          r = rule.validator(outParam);
+        }
+        if (r instanceof Promise) {
+          r.then(function () {
+            loop(resolve, reject);
+          }).catch(function (msg) {
+            $errorTipTarget = vForm.getElementTip(fieldName);
+            reject(msg === undefined ? outParam.hasOwnProperty("message") ? outParam.message : rule.hasOwnProperty("message") ? rule.message : vForm.getTipMessage($errorTipTarget, ruleName) : msg);
+          });
+        } else if (!r) {
+          $errorTipTarget = vForm.getElementTip(fieldName);
+          reject(outParam.hasOwnProperty("message") ? outParam.message : rule.hasOwnProperty("message") ? rule.message : vForm.getTipMessage($errorTipTarget, ruleName));
+        } else{
+          loop(resolve, reject);
+        }
+      } else{
+        resolve();
+      }
+    });
+  },
+  /**指定2个参数，判断a中的任一元素是否包含在b中
+   * a和b都可以是数组和非数组类型
+   * */
+  contains(a, b){
+    b = type.wrapArray(b);
+    return type.wrapArray(a).some(item => b.indexOf(item) > -1);
+  },
+  formatRule(ruleName, value, rule1, rule2) {
+    var type = this.type;
     //如果规则本身是个处理器（匿名处理器），按照处理器的规则进行校验
-    if (type.String(ruleName)) {
+    if (type.isString(ruleName)) {
       //根据校验器的名称获取对应的校验规则，优先使用私有校验器
-      rule = rules[ruleName] || this.rules[ruleName];
-    }
-    if (type.isPlainObject(rule)){ // 纯对象格式{ name: "校验器的名称，多个校验器的时候可以指定校验某种。默认全部校验" }
-      // 和指定校验规则名称相等的校验器执行，不相等跳过
-      if(vName !== undefined && vName === rule.name){
-        r = rule.validate.call(outParam, value);
+      return rule1[ruleName] || rule2[ruleName] || function () {
+        return true
       }
     }
     /**自定义校验规则
@@ -75,18 +116,20 @@ let methods = {
                            * }
      * @return Boolean（非Object） 校验成功/失败
      * */
-    else if (type.isFunction(rule)) {
-      r = rule.call(outParam, value);
-    } else if (rule instanceof RegExp) {
-      r = rule.test(value);
+    else if (type.isFunction(ruleName)) {
+      return ruleName;
+    } else if (ruleName instanceof RegExp) {
+      return function ({value}) {
+        return ruleName.test(value)
+      };
+    } else if (!ruleName) {
+      return function () {
+        return true
+      }
+    } else {
+      return ruleName;
     }
-    if (!r) {
-      $errorTipTarget = this.getElementTip(fieldName);
-      return outParam.hasOwnProperty("message") ? outParam.message : this.getTipMessage($errorTipTarget, ruleName);
-    }
-  }
-  return true;
-},
+  },
   setData(v) {
     var vForm = this;
     //设置所有表单的值
@@ -94,9 +137,9 @@ let methods = {
       var fieldName = item.name,
         value = vForm.dataConvert(v[fieldName] === null || v[fieldName] === undefined ? item.defaultValue : v[fieldName], item.type),
         $target = vForm.getElement(fieldName), set = item.set || item.as,
-        outParam = {vForm, $target, fieldName, item};
+        outParam = {vForm, $target, fieldName, item, value};
       if (typeof set == "function") {
-        set.call(outParam, $target, value, vForm, item);
+        set(outParam);
       } else {
         switch (set) {
           case "value":
