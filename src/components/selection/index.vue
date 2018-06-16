@@ -55,6 +55,8 @@
   </div>
 </template>
 <script>
+  /**TODO 下拉list中自定义特别复杂的dom在选中面板中无法显示，因为只是简单的支持text格式
+   * */
   import "./selection.less";
   import focusPanel from "./focusPanel.vue";
   import SelectionOption from "./option.vue";
