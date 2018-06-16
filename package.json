@@ -5,7 +5,7 @@
   "main": "",
   "scripts": {
     "dev": "node build/dev-server.js",
-    "pack": "webpack --config build/webpack.base.conf.js"
+    "pack": "webpack --config build/webpack.pack.conf.js"
   },
   "author": "",
   "license": "ISC",
