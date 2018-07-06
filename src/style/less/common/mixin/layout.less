@@ -11,7 +11,7 @@
 */
 .m-group(@hgap, @vgap: @hgap){
   // 所有的group都有底部边距
-  .hgroup, .vgroup, .flex-hgroup{
+  .hgroup, .vgroup, .flex-hgroup, .fgroup{
     &.group-block, .group-block & {
       margin-bottom: @vgap;
     }
@@ -19,41 +19,6 @@
       margin-bottom: @vgap;
     }
     &.group-noblock, .group-noblock & {
-      margin-bottom: 0;
-    }
-  }
-  ._m-clearfix(){
-    &:after {
-      content: " ";
-      display: block;
-      width: 0;
-      height: 0;
-      line-height: 0;
-      clear: both;
-    }
-  }
-  // 块布局，并且有底部边距
-  ._m-block_(){
-    display: block;
-  }
-  ._m-block_(@vgap){
-    display: block;
-    margin-bottom: @vgap;
-  }
-  ._m-inline_(){
-    display: inline-block;
-    margin-right: @hgap;
-    &:last-child{
-      margin-right: 0;
-    }
-  }
-  ._fgroup_(){
-    ._m-block_();
-    &, & > .flex-hgroup, &.flex-vgroup{
-      display: flex;
-    }
-    &.inline, .hgroup > &{
-      display: inline-flex;
       margin-bottom: 0;
     }
   }
@@ -81,7 +46,7 @@
       ._m-inline_();
     }
   }
-  .flex-hgroup{
+  .flex-hgroup, .fgroup{
     ._fgroup_();
     > *{
       ._m-inline_();
@@ -112,6 +77,41 @@
   .blockgap{
 
   }
+  ._m-clearfix(){
+    &:after {
+      content: " ";
+      display: block;
+      width: 0;
+      height: 0;
+      line-height: 0;
+      clear: both;
+    }
+  }
+  // 块布局
+  ._m-block_(){
+    display: block;
+  }
+  ._m-block_(@vgap){
+    display: block;
+    margin-bottom: @vgap;
+  }
+  ._m-inline_(){
+    display: inline-block;
+    margin-right: @hgap;
+    &:last-child{
+      margin-right: 0;
+    }
+  }
+  ._fgroup_(){
+    ._m-block_();
+    &, & > .flex-hgroup, .fgroup, &.flex-vgroup{
+      display: flex;
+    }
+    &.inline, .hgroup > &{
+      display: inline-flex;
+      margin-bottom: 0;
+    }
+  }
   ._m-nohgap_(@name){
     .@{name}, .@{name} > *, .@{name}-self, .@{name}-sub > *{
       margin-right: 0;
@@ -129,40 +129,41 @@
   // .nogap同时没有水平边距和垂直边距
   ._m-nohgap_(nogap);
   ._m-novgap_(nogap);
-}
-// 私有mixin，设置水平间距
-._m-group-hgap_(@hgap){
-  &.hgroup > *, &.flex-hgroup > *{
-    margin-right: @hgap;
-    &:last-child{
-      margin-right: 0;
+
+  // 私有mixin，设置水平间距
+  ._m-group-hgap_(@hgap){
+    &.hgroup > *, &.flex-hgroup > *, &.fgroup > *{
+      margin-right: @hgap;
+      &:last-child{
+        margin-right: 0;
+      }
     }
   }
-}
-// 私有mixin，设置垂直间距
-._m-group-vgap_(@vgap){
-  &.hgroup, &.vgroup, &.flex-vgroup > *{
-    margin-bottom: @vgap;
-    &:last-child{
-      margin-bottom: 0;
+  // 私有mixin，设置垂直间距
+  ._m-group-vgap_(@vgap){
+    &.hgroup, &.vgroup, &.flex-vgroup > *{
+      margin-bottom: @vgap;
+      &:last-child{
+        margin-bottom: 0;
+      }
     }
   }
 }
 /* 指定一个额外的class，重新定义group系列的间距大小 */
 .m-group-gap(@name, @hgap, @vgap: @hgap){
   .@{name}{
-    ._m-group-hgap_(@hgap);
-    ._m-group-vgap_(@vgap);
+    .m-group._m-group-hgap_(@hgap);
+    .m-group._m-group-vgap_(@vgap);
   }
 }
 .m-group-hgap(@name, @hgap){
   .@{name}{
-    ._m-group-hgap_(@hgap);
+    .m-group._m-group-hgap_(@hgap);
   }
 }
 .m-group-vgap(@name, @vgap){
   .@{name}{
-    ._m-group-vgap_(@hgap);
+    .m-group._m-group-vgap_(@hgap);
   }
 }
 
