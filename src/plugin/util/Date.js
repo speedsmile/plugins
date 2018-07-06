@@ -204,28 +204,18 @@ function m () {
     toString: function (date, format) {
       arguments.length < 2 && (format = date, date = this);
       date instanceof Date || (date = this.parseDate(date));
-      // 前缀补0
-      function dateFormat (n, len) {
-        let arr = n.toString().split("."), integer = arr[0], decimal = arr[1];
-        for (let i = 0, l = len - integer.length; i < l; i++) {
-          integer = "0" + integer;
-        }
-        return integer;
-      }
-
-      // TODO 待优化
       let reg = /Y{1,4}|M{1,2}|D{1,2}|H{1,2}|i{1,2}|s{1,2}/ig,
-        y = date.getFullYear(),
-        M = date.getMonth() + 1,
-        d = date.getDate(),
-        h = date.getHours(),
-        m = date.getMinutes(),
-        s = date.getSeconds(),
-        arr = [y, M, d, h, m, s], map = "YMDHIS";
+        map = {
+          Y: date.getFullYear(),
+          M: date.getMonth() + 1,
+          D: date.getDate(),
+          H: date.getHours(),
+          I: date.getMinutes(),
+          S: date.getSeconds()
+        };
       return (format || "YYYY-MM-DD HH:II:SS").replace(reg, function (a) {
-        let f = a.charAt(0).toUpperCase(), index = map.indexOf(f);
-        // 除了年份，其他时间位数不够自动前缀补0
-        return f == "Y" ? arr[index].toString().slice(-a.length) : dateFormat(arr[index], a.length);
+        let f = a.charAt(0).toUpperCase();
+        return ("0" + map[f]).slice(-a.length);
       });
     },
     /**在指定的日期对象的基础上进行日期时间上的偏移
