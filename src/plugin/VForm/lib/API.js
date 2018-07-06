@@ -72,7 +72,7 @@ let methods = {
          * 2、指定了单个校验名称，和名称相等的校验器执行，不相等的跳过
          * */
         if (!vName || methods.contains(vName, rule.trigger)) {
-          r = rule.validator(outParam);
+          r = rule.validator(value, outParam);
         }
         if (r instanceof Promise) {
           r.then(function () {
@@ -119,7 +119,7 @@ let methods = {
     else if (type.isFunction(ruleName)) {
       return ruleName;
     } else if (ruleName instanceof RegExp) {
-      return function ({value}) {
+      return function (value) {
         return ruleName.test(value)
       };
     } else if (!ruleName) {

@@ -17,7 +17,7 @@ var entry = Entry("test/*/*.js", {base: "test", template: {output: resolve("dist
 module.exports = {
   // entry: entry.js,
   entry: {
-    "VForm.cmd": "./src/plugin/VForm/VForm.cmd"
+    // "VForm.cmd": "./src/plugin/VForm/VForm.cmd"
   },
   output: {
     path: config.build.assetsRoot,

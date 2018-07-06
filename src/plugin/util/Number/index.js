@@ -12,6 +12,9 @@
  */
 let type = require("./../type");
 function m() {
+  Math.trunc = Math.trunc || function(x) {
+    return x < 0 ? Math.ceil(x) : Math.floor(x);
+  };
   let ext = {
     /**把可转成数字的对象转换成扩展的Number对象
      * */
@@ -145,4 +148,4 @@ function m() {
   Object.assign(F, Number, ext);
   return F;
 }
-module.exports = m();
+export default m();

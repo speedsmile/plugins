@@ -51,7 +51,7 @@ export default function (o = {}) {
        * */
       rules: {
         // 正则表达式不能校验出null和undefined
-        require: function ({value}) {
+        require: function (value) {
           return value != null && /\S+/.test(value.toString());
         },
         text: /^[\u4e00-\u9fa5\w]+$/,
@@ -67,19 +67,19 @@ export default function (o = {}) {
         //整数
         int: /^([+-]?\d+)?$/,
         //正整数（positive integer）
-        pint: function ({value}) {
+        pint: function (value) {
           return value === "" || /^\d+$/.test(value) && Number(value) > 0;
         },
         //负整数（negative integer）
-        nint: function ({value}) {
+        nint: function (value) {
           return value === "" || /^-\d+$/.test(value) && Number(value) < 0;
         },
         //非负整数，无符号整数（0和正整数）
-        uint: function ({value}) {
+        uint: function (value) {
           return value === "" || /^\d+$/.test(value) && Number(value) >= 0;
         },
         //非正整数（0和负整数）
-        mint: function ({value}) {
+        mint: function (value) {
           return value === "" || /^-\d+$/.test(value) && Number(value) <= 0;
         }
       },
@@ -153,7 +153,7 @@ export default function (o = {}) {
            * */
           if (type.isFunction(field.wrap)) {
             let outParam = {vForm, value, field, target};
-            value = field.wrap(outParam);
+            value = field.wrap(value, outParam);
           }
           formData[fieldName] = value;
           validFields.push(fieldName);

@@ -12,20 +12,20 @@ function resolve(dir) {
   return path.join(__dirname, '..', dir)
 }
 console.log(utils.assetsPath('img/[name].[hash:7].[ext]'))
-var entry = Entry("test/*/*.js", {base: "test", template: {output: resolve("dist/") + require("../package.json").name}});
 
 module.exports = {
   // entry: entry.js,
   entry: {
+    "ajax-promise": "./src/lib/ajax/ajax-promise",
+    // "mint-ui/index": "./pack/mint-ui/index",
+    "NumberFormat": "./src/plugin/util/Number/cmd",
     "VForm.cmd": "./src/plugin/VForm/VForm.cmd"
     // "Selection.cmd": "./src/components/selection/cmd"
   },
   output: {
     path: config.build.assetsRoot,
     filename: '[name].js',
-    publicPath: process.env.NODE_ENV === 'production'
-      ? config.build.assetsPublicPath
-      : config.dev.assetsPublicPath
+    publicPath: "pack"
   },
   resolve: {
     extensions: ['.js', ".vue", ".less", ".css"],
@@ -84,7 +84,16 @@ module.exports = {
     ]
   },
   plugins: [
-    new ExtractTextPlugin("selection.css"),
+    new webpack.optimize.UglifyJsPlugin({
+      compress: {
+        drop_debugger: true,
+        drop_console: true,
+        warnings: true
+      },
+      sourceMap: false
+    }),
+    // new ExtractTextPlugin("selection.css"),
+    // new ExtractTextPlugin("mint-ui.css"),
     //...entry.html.map(html => new HtmlWebpackPlugin(html))
     // new webpack.ProvidePlugin({
     //   $: "jquery",
